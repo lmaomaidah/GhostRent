@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REGISTER - GhostRent</title>
+  <link rel="stylesheet" href="style.css" />
+  
+</head>
+
+<body>
+  <!-- Floating dust particles -->
+  <div class="dust" style="top:20%; left:40%; animation-delay:0s;"></div>
+  <div class="dust" style="top:60%; left:70%; animation-delay:1.2s;"></div>
+  <div class="dust" style="top:30%; left:80%; animation-delay:2.5s;"></div>
+
+  <div class="container">
+    <nav class="navbar">
+      <div class="logo">
+        <img src="logo.png" alt="Ghost Rent Logo">
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">The Manor</a></li>
+      </ul>
+    </nav>
+
+    <div class="form-section">
+      <h4 class="small-title">NEW SPIRIT ARRIVAL</h4>
+      <h1 class="main-title">Join the Ghostly Estate.</h1>
+      <p class="login-text">
+        Already among the haunted? <a href="loginpage.html" class="login-link">Reawaken here</a>
+      </p>
+
+      <form class="signup-form">
+        <div class="name-fields">
+          <div class="form-group">
+            <label for="first-name">First Name</label>
+            <input type="text" id="first-name" placeholder="Your mortal first name" aria-label="First name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="last-name">Last Name</label>
+            <input type="text" id="last-name" placeholder="Your mortal last name" aria-label="Last name" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your ghostly email address" aria-label="Email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Choose a secret incantation (password)" aria-label="Password" required>
+        </div>
+
+        <p style="color:#888; font-size:0.85rem; margin-top:-10px;">Keep your incantation secret — even spirits can’t retrieve it once lost.</p>
+
+        <!-- Role selection -->
+        <div class="form-group">
+          <label for="role">Choose your role</label>
+          <select id="role" name="role" required>
+            <option value="" disabled selected>— Select your purpose —</option>
+            <option value="user">Regular User (Seeker of haunted homes)</option>
+            <option value="lister">Property Lister (Keeper of cursed estates)</option>
+          </select>
+        </div>
+
+        <!-- Terms and conditions -->
+        <div class="terms">
+          <input type="checkbox" id="terms" required>
+          <label for="terms">
+            I accept the <a href="#" id="openTerms" class="terms-link">Terms & Conditions</a> of the Haunted Realm.
+          </label>
+        </div>
+
+        <div class="buttons">
+          <button type="button" class="change-method">Change ritual</button>
+          <button type="submit" class="create-account">Join the Estate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Terms Modal -->
+  <div id="termsModal" class="modal">
+    <div class="modal-content">
+      <div class="mist"></div>
+      <span class="close-btn">&times;</span>
+      <h2>The Haunted Realm’s Terms</h2>
+      <p>
+        BY JOINING GHOSTRENT, YOU AGREE THAT:  
+        <br><br>• All bookings are final, whether you survive or not.  
+        <br>• Phantom disturbances are to be reported but not refunded.  
+        <br>• The management is not liable for spiritual possessions or eternal hauntings.  
+        <br>• Violating these terms may result in eternal confinement within the server dungeons.  
+        <br><br>PROCEED ONLY IF YOU DARE...
+      </p>
+      <button class="accept-btn">I Understand</button>
+    </div>
+  </div>
+
+  <script>
+    // Backend integration
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelector(".signup-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const data = {
+          firstName: document.getElementById("first-name").value,
+          lastName: document.getElementById("last-name").value,
+          email: document.getElementById("email").value,
+          password: document.getElementById("password").value,
+          role: document.getElementById("role").value
+        };
+
+        try {
+          const res = await fetch("/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
+
+          const result = await res.json();
+          alert(result.message);
+
+          if (result.success) {
+            window.location.href = "loginpage.html";
+          }
+        } catch (error) {
+          console.error("Registration error:", error);
+          alert("⚰️ Error connecting to the spirit realm. Please try again.");
+        }
+      });
+
+      // Terms modal
+      const modal = document.getElementById("termsModal");
+      const openTerms = document.getElementById("openTerms");
+      const closeBtn = document.querySelector(".close-btn");
+      const acceptBtn = document.querySelector(".accept-btn");
+
+      openTerms.addEventListener("click", (e) => {
+        e.preventDefault();
+        modal.style.display = "flex";
+      });
+
+      closeBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+
+      acceptBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+
+      window.addEventListener("click", (e) => {
+        if (e.target === modal) modal.style.display = "none";
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "ghostrent-backend",
+  "version": "1.0.0",
+  "description": "Backend server for GhostRent - Haunted House Rental Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["haunted", "rental", "ghost", "authentication"],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "cookie-parser": "^1.4.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

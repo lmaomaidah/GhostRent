@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LOGIN - GhostRent</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="dust" style="top:20%; left:40%; animation-delay:0s;"></div>
+  <div class="dust" style="top:60%; left:70%; animation-delay:1.2s;"></div>
+  <div class="dust" style="top:30%; left:80%; animation-delay:2.5s;"></div>
+
+  <div class="container">
+    <nav class="navbar">
+      <div class="logo">
+        <img src="logo.png" alt="Ghost Rent Logo">
+      </div>
+      <ul class="nav-links">
+        <li><a href="#">The Manor</a></li>
+      </ul>
+    </nav>
+
+    <div class="form-section">
+      <h4 class="small-title">👁 WELCOME BACK, LOST SOUL. . .</h4>
+      <h1 class="main-title">Reawaken your spirit.</h1>
+      <p class="login-text">New to the haunting? <a href="index.html" class="login-link">Summon an account</a></p>
+
+      <form class="signup-form">
+        <div class="form-group">
+          <label for="email">Your Phantom Mail</label>
+          <input type="email" id="email" placeholder="e.g. yourname@afterlife.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Your Secret Incantation</label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+
+        <div class="buttons">
+          <button type="button" class="change-method">Forgot ritual?</button>
+          <button type="submit" class="create-account">Reawaken</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Wait for DOM to load
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelector(".signup-form").addEventListener("submit", async (e) => {
+        e.preventDefault(); // Prevent page reload
+
+        const data = {
+          email: document.getElementById("email").value,
+          password: document.getElementById("password").value
+        };
+
+        try {
+          const res = await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            credentials: 'include' // IMPORTANT: Include cookies
+          });
+
+          const result = await res.json();
+          
+          console.log("Login result:", result); // Debug log
+          
+          alert(result.message);
+
+          if (result.success) {
+            // Redirect to dashboard
+            window.location.href = "dashboard.html";
+          }
+        } catch (error) {
+          console.error("Login error:", error);
+          alert("⚰️ Error connecting to the spirit realm. Please try again.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
