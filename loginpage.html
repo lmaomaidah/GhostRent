@@ -19,12 +19,12 @@
         <img src="logo.png" alt="Ghost Rent Logo">
       </div>
       <ul class="nav-links">
-        <li><a href="#">The Manor</a></li>
+        <li><a href="dashboard.html">The Manor</a></li>
       </ul>
     </nav>
 
     <div class="form-section">
-      <h4 class="small-title">👁 WELCOME BACK, LOST SOUL. . .</h4>
+      <h4 class="small-title">👻 WELCOME BACK, LOST SOUL...</h4>
       <h1 class="main-title">Reawaken your spirit.</h1>
       <p class="login-text">New to the haunting? <a href="index.html" class="login-link">Summon an account</a></p>
 
@@ -48,10 +48,9 @@
   </div>
 
   <script>
-    // Wait for DOM to load
     document.addEventListener('DOMContentLoaded', function() {
       document.querySelector(".signup-form").addEventListener("submit", async (e) => {
-        e.preventDefault(); // Prevent page reload
+        e.preventDefault();
 
         const data = {
           email: document.getElementById("email").value,
@@ -63,18 +62,37 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
-            credentials: 'include' // IMPORTANT: Include cookies
+            credentials: 'include'
           });
 
           const result = await res.json();
           
-          console.log("Login result:", result); // Debug log
+          console.log("Login result:", result);
+          console.log("User role:", result.user ? result.user.role : "NO USER");
           
-          alert(result.message);
-
-          if (result.success) {
-            // Redirect to dashboard
-            window.location.href = "dashboard.html";
+          if (result.success && result.user) {
+            // Show success message
+            alert(result.message + '\n\nRole: ' + result.user.role);
+            
+            // ROLE-BASED REDIRECT with detailed logging
+            const userRole = result.user.role;
+            console.log("Redirecting based on role:", userRole);
+            
+            if (userRole === 'admin') {
+              console.log("Going to admin dashboard");
+              window.location.href = "dashboard-admin.html";
+            } else if (userRole === 'lister') {
+              console.log("Going to lister dashboard");
+              window.location.href = "dashboard-propertylister.html";
+            } else if (userRole === 'user') {
+              console.log("Going to user dashboard");
+              window.location.href = "dashboard-user.html";
+            } else {
+              console.log("Unknown role, going to default dashboard");
+              window.location.href = "dashboard.html";
+            }
+          } else {
+            alert(result.message || "Login failed");
           }
         } catch (error) {
           console.error("Login error:", error);
