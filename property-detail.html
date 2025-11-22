@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GhostRent — Property Details</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&family=Griffy&family=Cinzel:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* SAME THEME / SAME VARIABLES */
+    :root{
+      --bg-midnight: #0a0f1a;
+      --bg-deep: #0d1b2a;
+      --bg-indigo: #102542;
+      --bg-ink: #1b263b;
+      --muted: #c3c8cc;
+      --accent: #6fb3d6;
+      --card-bg: rgba(14,18,24,0.7);
+      --glass-border: rgba(255,255,255,0.04);
+      --card-edge: rgba(255,255,255,0.02);
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Cinzel',serif;
+      background:linear-gradient(150deg,var(--bg-midnight),var(--bg-deep),var(--bg-indigo),var(--bg-ink));
+      color:var(--muted);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    .page-bg{
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 5%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.01), transparent 8%),
+        linear-gradient(180deg, rgba(255,255,255,0.01), transparent 25%);
+      position:fixed;
+      inset:0;
+      z-index:0;
+      filter: blur(1px) saturate(.95);
+    }
+    .overlay{
+      position:fixed;inset:0;background:linear-gradient(90deg,rgba(3,6,12,0.35),rgba(2,4,8,0.55));
+      z-index:0;
+    }
+
+    .container{
+      width:92%;
+      max-width:1200px;
+      margin:0 auto;
+      position:relative;
+      z-index:2;
+      padding-top:20px;
+    }
+
+    /* HEADER */
+    header{padding:12px 0 20px 0}
+    header .container{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.06)}
+    .site-name{font-family:'Griffy',cursive;color:#e8f6fb;font-size:1.2rem;letter-spacing:2px}
+
+    .nav a{
+      margin-left:18px;
+      color:var(--muted);
+      text-decoration:none;
+      padding:8px 14px;
+      border-radius:22px;
+      transition:.2s;
+      font-weight:600;
+    }
+    .nav a:hover{background:rgba(255,255,255,0.02);color:#fff;transform:translateY(-2px)}
+
+    /* MAIN CONTENT */
+    .detail-header{
+      margin-top:10px;
+      text-align:center;
+    }
+    .detail-title{
+      font-family:'Henny Penny',cursive;
+      font-size:2.2rem;
+      color:#e8f6fb;
+      text-shadow:0 0 12px rgba(120,190,220,0.1);
+    }
+    .detail-location{
+      margin-top:6px;
+      font-size:1rem;
+      color:#bfc8c9;
+    }
+
+    /* IMAGE SECTION */
+    .gallery{
+      margin-top:25px;
+      display:flex;
+      gap:20px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .gallery img{
+      width:100%;
+      max-width:700px;
+      border-radius:16px;
+      border:1px solid var(--glass-border);
+      box-shadow:0 10px 40px rgba(0,0,0,0.7);
+      object-fit:cover;
+    }
+
+    /* DETAILS BOX */
+    .detail-box{
+      margin-top:30px;
+      background:linear-gradient(180deg,rgba(12,16,20,0.6),rgba(6,10,14,0.55));
+      border:1px solid var(--card-edge);
+      padding:24px;
+      border-radius:14px;
+      box-shadow:0 8px 28px rgba(0,0,0,0.6), inset 0 -4px 40px rgba(10,14,18,0.25);
+      backdrop-filter:blur(4px);
+    }
+
+    .detail-box h2{
+      font-family:'Griffy',cursive;
+      font-size:1.5rem;
+      margin-bottom:12px;
+      color:#eef6f6;
+    }
+
+    .detail-box p{
+      line-height:1.6;
+      margin-bottom:12px;
+      color:#bfc8c9;
+      font-size:1rem;
+    }
+
+    /* INFO GRID */
+    .info-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:16px;
+      margin-top:15px;
+    }
+
+    .info-item{
+      background:rgba(255,255,255,0.03);
+      padding:14px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.04);
+      text-align:center;
+      font-size:0.95rem;
+    }
+
+    .info-label{color:#9fb1bb;font-size:0.8rem}
+    .info-value{color:#e7faff;font-weight:700;font-size:1.1rem;margin-top:4px}
+
+    /* BOOKING BOX */
+    .booking{
+      margin-top:30px;
+      padding:22px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.04);
+      text-align:center;
+    }
+
+    .price-big{
+      font-size:2rem;
+      font-weight:700;
+      color:#dbeff6;
+      margin-bottom:16px;
+    }
+
+    .ghost-btn{
+      padding:12px 20px;
+      font-size:1rem;
+      background:transparent;
+      border:1px solid rgba(120,200,240,0.06);
+      color:#dfeff0;
+      border-radius:10px;
+      cursor:pointer;
+      transition:.18s;
+      font-family:'Cinzel',serif;
+    }
+    .ghost-btn:hover{
+      background:linear-gradient(180deg,rgba(120,200,240,0.03),rgba(60,140,160,0.02));
+      transform:translateY(-3px)
+    }
+
+    footer{
+      text-align:center;
+      padding:30px 0;
+      margin-top:40px;
+      color:#8f9a9a;
+      font-size:0.95rem;
+      border-top:1px solid rgba(255,255,255,0.03);
+    }
+  </style>
+
+</head>
+<body>
+  <div class="page-bg"></div>
+  <div class="overlay"></div>
+
+  <header>
+    <div class="container">
+      <div class="brand">
+        <img src="logo.png" class="logo">
+        <span class="site-name">GhostRent</span>
+      </div>
+
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="property-list.html">Haunted Estates</a>
+        <a href="register.html">Register</a>
+        <a href="loginpage.html">Log In</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <div class="detail-header">
+      <h1 class="detail-title">The Whispering Hollow Manor</h1>
+      <p class="detail-location">Old Countryside · Level 4 Haunting</p>
+    </div>
+
+    <!-- IMAGE -->
+    <div class="gallery">
+      <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1500&q=80" alt="Manor Image">
+    </div>
+
+    <!-- DETAILS -->
+    <section class="detail-box">
+      <h2>About This Property</h2>
+      <p>
+        A chilling 19th-century manor known for soft whispers in the hallways and
+        a friendly (mostly) apparition that roams the eastern wing. Perfect for
+        thrill-seekers, paranormal researchers, or anyone who loves atmospheric
+        living spaces with character… lots of character.
+      </p>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Haunting Level</div>
+          <div class="info-value">4</div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">Owner</div>
+          <div class="info-value">Eleanor Graves</div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">Area</div>
+          <div class="info-value">Countryside</div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">Status</div>
+          <div class="info-value">Available</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOOKING SECTION -->
+    <section class="booking">
+      <div class="price-big">$3,200 / month</div>
+      <button class="ghost-btn">Book This Property</button>
+    </section>
+
+  </main>
+
+  <footer>
+    © Phantom Systems — GhostRent. Enter at your own risk.
+  </footer>
+
+</body>
+</html>

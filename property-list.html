@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GhostRent — Haunted Listings</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&family=Griffy&family=Cinzel:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Page CSS -->
+  <link rel="stylesheet" href="property-list.css">
+</head>
+<body>
+  <div class="page-bg"></div>
+  <div class="overlay"></div>
+
+  <header class="topbar">
+    <div class="container">
+      <div class="brand">
+        <img src="logo.png" alt="GhostRent logo" class="logo">
+        <span class="site-name">GhostRent</span>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="property-list.html">Haunted Estates</a>
+        <a href="register.html">Register</a>
+        <a href="loginpage.html">Log In</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-inner">
+      <h1 class="hero-title">Your Reliable Ally in Worldwide Haunted Estates</h1>
+      <p class="hero-sub">Find the perfect cursed manor or cozy spectral cottage — if you dare.</p>
+
+      <form id="searchForm" class="search-bar" role="search" aria-label="Search properties">
+        <div class="field">
+          <label for="typeSelect">Type</label>
+          <select id="typeSelect" name="type">
+            <option value="">Any</option>
+            <option>Manor</option>
+            <option>Cottage</option>
+            <option>Vineyard</option>
+            <option>Coastal</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="priceSelect">Price</label>
+          <select id="priceSelect" name="price">
+            <option value="">Any</option>
+            <option value="0-2000">$0 - $2k</option>
+            <option value="2000-5000">$2k - $5k</option>
+            <option value="5000+">$5k+</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="areaSelect">Area</label>
+          <select id="areaSelect" name="area">
+            <option value="">Any</option>
+            <option>New England</option>
+            <option>Pacific</option>
+            <option>Countryside</option>
+          </select>
+        </div>
+
+        <button type="submit" class="search-btn">Search</button>
+      </form>
+    </div>
+  </section>
+
+  <main class="container listing-area" id="mainListing">
+    <div class="list-controls">
+      <div class="results-count" id="resultsCount">Showing <strong>0</strong> haunted listings</div>
+      <div class="sort">
+        <label for="sortSelect">Sort</label>
+        <select id="sortSelect">
+          <option value="recommended">Recommended</option>
+          <option value="priceAsc">Price: Low to High</option>
+          <option value="priceDesc">Price: High to Low</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
+    </div>
+
+    <section class="grid" id="listGrid" aria-live="polite">
+      <!-- cards will be injected here -->
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© Phantom Systems — GhostRent. Enter at your own risk.</p>
+    </div>
+  </footer>
+
+  <script>
+    // ===========================
+    // property-list client script
+    // ===========================
+    // NOTE: fallbackImage uses the uploaded file path you provided.
+    // Keep this file available locally or replace with your hosted asset.
+    const fallbackImage = '/mnt/data/96470758-e747-4623-9801-06d84f758d53.jpg';
+
+    // Query helper
+    const qs = (sel, ctx=document) => ctx.querySelector(sel);
+
+    // DOM refs
+    const grid = qs('#listGrid');
+    const resultsCount = qs('#resultsCount strong');
+    const searchForm = qs('#searchForm');
+    const sortSelect = qs('#sortSelect');
+
+    // Store loaded properties
+    let properties = [];
+
+    // Format currency
+    function fmtPrice(p) {
+      if (isNaN(p)) return p;
+      return (p).toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    }
+
+    // Create a single card DOM node
+    function createCard(prop) {
+      const article = document.createElement('article');
+      article.className = 'card';
+
+      const media = document.createElement('div');
+      media.className = 'media';
+      const img = document.createElement('img');
+      img.alt = prop.title || 'Haunted property';
+      img.src = prop.image || fallbackImage;
+      img.onerror = () => { img.src = fallbackImage; };
+      media.appendChild(img);
+
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = prop.available ? 'For Rent' : 'Unavailable';
+      media.appendChild(badge);
+
+      const body = document.createElement('div');
+      body.className = 'card-body';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = prop.location || 'Unknown location';
+      body.appendChild(meta);
+
+      const h3 = document.createElement('h3');
+      h3.className = 'title';
+      h3.textContent = prop.title || 'Unnamed Manor';
+      body.appendChild(h3);
+
+      const specs = document.createElement('p');
+      specs.className = 'specs';
+      const haunting = prop.haunting_level ? `Haunt: ${prop.haunting_level}` : '';
+      const owner = prop.ownerName ? `Owner: ${prop.ownerName}` : '';
+      specs.innerHTML = `${haunting} ${owner ? '· ' + owner : ''}`;
+      body.appendChild(specs);
+
+      const footer = document.createElement('div');
+      footer.className = 'card-footer';
+
+      const price = document.createElement('div');
+      price.className = 'price';
+      price.textContent = fmtPrice(prop.price || 0);
+      footer.appendChild(price);
+
+      const btn = document.createElement('button');
+      btn.className = 'btn ghost-btn';
+      btn.type = 'button';
+      btn.textContent = 'View Details';
+      btn.addEventListener('click', () => {
+        // Replace with detail page route when ready:
+        // e.g. window.location.href = `/property/${prop.id}`
+        alert(`Open details for "${prop.title}" (placeholder).`);
+      });
+      footer.appendChild(btn);
+
+      body.appendChild(footer);
+
+      article.appendChild(media);
+      article.appendChild(body);
+
+      return article;
+    }
+
+    // Render properties array to DOM
+    function renderList(list) {
+      grid.innerHTML = '';
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty">No haunted listings found.</div>';
+        resultsCount.textContent = 0;
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      list.forEach(p => frag.appendChild(createCard(p)));
+      grid.appendChild(frag);
+      resultsCount.textContent = list.length;
+    }
+
+    // Fetch properties from backend
+    async function fetchProperties() {
+      try {
+        const res = await fetch('/api/properties', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          credentials: 'same-origin' // ensures cookies (ghostToken) are sent
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          // Not authenticated — show friendly prompt
+          grid.innerHTML = `
+            <div class="auth-warning">
+              <p>You must be logged in to view haunted listings. <a href="loginpage.html">Log in</a> or <a href="register.html">Register</a> to continue.</p>
+            </div>`;
+          resultsCount.textContent = 0;
+          return;
+        }
+
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.properties)) {
+          grid.innerHTML = '<div class="empty">No haunted listings available right now.</div>';
+          resultsCount.textContent = 0;
+          return;
+        }
+
+        // insert ownerName if backend didn't provide it (defensive)
+        properties = data.properties.map(p => ({
+          id: p.id,
+          title: p.title,
+          description: p.description,
+          location: p.location,
+          price: p.price,
+          haunting_level: p.haunting_level,
+          ownerId: p.ownerId,
+          ownerName: p.ownerName || '',
+          available: p.available,
+          image: p.image || '' // backend currently doesn't provide image; keep empty
+        }));
+
+        renderList(properties);
+
+      } catch (err) {
+        console.error('Fetch error', err);
+        grid.innerHTML = '<div class="empty">Could not connect to the realm. Try again later.</div>';
+      }
+    }
+
+    // Basic client filtering (search form) & sorting
+    function applyFilters(e) {
+      if (e) e.preventDefault();
+      const type = qs('#typeSelect').value;
+      const price = qs('#priceSelect').value;
+      const area = qs('#areaSelect').value;
+      let filtered = properties.slice();
+
+      // Filter by area/location rough match
+      if (area) filtered = filtered.filter(p => (p.location||'').toLowerCase().includes(area.toLowerCase()));
+
+      // Filter by price range
+      if (price) {
+        if (price === '0-2000') filtered = filtered.filter(p => p.price <= 2000);
+        if (price === '2000-5000') filtered = filtered.filter(p => p.price > 2000 && p.price <= 5000);
+        if (price === '5000+') filtered = filtered.filter(p => p.price > 5000);
+      }
+
+      // Sort
+      const sort = sortSelect.value;
+      if (sort === 'priceAsc') filtered.sort((a,b)=>a.price-b.price);
+      if (sort === 'priceDesc') filtered.sort((a,b)=>b.price-a.price);
+      if (sort === 'newest') filtered.sort((a,b)=>new Date(b.createdAt) - new Date(a.createdAt));
+
+      renderList(filtered);
+    }
+
+    // Event listeners
+    searchForm.addEventListener('submit', applyFilters);
+    sortSelect.addEventListener('change', applyFilters);
+
+    // Initial fetch
+    fetchProperties();
+  </script>
+</body>
+</html>
