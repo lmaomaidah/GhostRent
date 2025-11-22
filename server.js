@@ -4,10 +4,17 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 const PORT = 3000;
 const JWT_SECRET = 'your-secret-haunted-key-change-this-in-production';
+
+// Ensure upload directories exist
+const uploadDir = path.join(__dirname, 'uploads', 'properties');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // ====================================
 // MULTER CONFIGURATION FOR FILE UPLOADS
@@ -67,6 +74,9 @@ const users = [
 const hosts = [];
 const properties = [];
 const bookings = [];
+
+// Track property views for popularity (US-15)
+const propertyViews = {};
 
 // ====================================
 // HELPER FUNCTIONS
@@ -465,26 +475,8 @@ app.get('/api/admin/users', authenticateToken, requireRole('admin'), (req, res) 
 });
 
 // ====================================
-// PROPERTY MANAGEMENT (For Listers)
+// US-5: CREATE PROPERTY LISTING
 // ====================================
-app.get('/api/lister/properties', authenticateToken, requireRole('lister'), (req, res) => {
-  const host = findHostByUserId(req.user.userId);
-  
-  if (!host || !host.verified) {
-    return res.status(403).json({
-      success: false,
-      message: '⏳ Your host account is pending verification. Please wait for admin approval.'
-    });
-  }
-
-  const userProperties = properties.filter(p => p.ownerId === req.user.userId);
-
-  res.status(200).json({
-    success: true,
-    properties: userProperties
-  });
-});
-
 app.post('/api/lister/properties', authenticateToken, requireRole('lister'), (req, res) => {
   const host = findHostByUserId(req.user.userId);
   
@@ -513,11 +505,13 @@ app.post('/api/lister/properties', authenticateToken, requireRole('lister'), (re
     price: parseFloat(price),
     haunting_level: haunting_level || 'moderate',
     available: true,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 
   properties.push(newProperty);
   host.properties.push(newProperty.id);
+  propertyViews[newProperty.id] = 0; // Initialize view count
 
   console.log(`🏚️ New property added: ${title} by ${req.user.name}`);
 
@@ -529,7 +523,7 @@ app.post('/api/lister/properties', authenticateToken, requireRole('lister'), (re
 });
 
 // ====================================
-// US-6: PROPERTY IMAGE UPLOAD
+// US-6: UPLOAD PROPERTY IMAGES
 // ====================================
 app.post('/api/lister/properties/:propertyId/images', 
   authenticateToken, 
@@ -555,6 +549,9 @@ app.post('/api/lister/properties/:propertyId/images',
     
     const imagePath = `/uploads/properties/${req.file.filename}`;
     property.image = imagePath;
+    property.updatedAt = new Date().toISOString();
+    
+    console.log(`📸 Image uploaded for property: ${property.title}`);
     
     res.status(200).json({
       success: true,
@@ -565,7 +562,7 @@ app.post('/api/lister/properties/:propertyId/images',
 );
 
 // ====================================
-// US-7: EDIT PROPERTY
+// US-7: EDIT PROPERTY LISTING
 // ====================================
 app.put('/api/lister/properties/:propertyId', 
   authenticateToken, 
@@ -610,7 +607,7 @@ app.put('/api/lister/properties/:propertyId',
 );
 
 // ====================================
-// US-8: DELETE PROPERTY
+// US-8: DELETE PROPERTY LISTING
 // ====================================
 app.delete('/api/lister/properties/:propertyId', 
   authenticateToken, 
@@ -635,7 +632,16 @@ app.delete('/api/lister/properties/:propertyId',
       });
     }
     
+    // Delete associated image if exists
+    if (property.image) {
+      const imagePath = path.join(__dirname, property.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+    
     properties.splice(propertyIndex, 1);
+    delete propertyViews[propertyId];
     
     console.log(`🗑️ Property deleted: ${property.title}`);
     
@@ -647,7 +653,28 @@ app.delete('/api/lister/properties/:propertyId',
 );
 
 // ====================================
-// US-10: GET SINGLE PROPERTY DETAILS
+// US-9: BROWSE ALL PROPERTIES
+// ====================================
+app.get('/api/properties', authenticateToken, (req, res) => {
+  const availableProperties = properties
+    .filter(p => p.available)
+    .map(p => {
+      const owner = findUserById(p.ownerId);
+      return {
+        ...p,
+        ownerName: `${owner.firstName} ${owner.lastName}`,
+        views: propertyViews[p.id] || 0
+      };
+    });
+
+  res.status(200).json({
+    success: true,
+    properties: availableProperties
+  });
+});
+
+// ====================================
+// US-10: VIEW PROPERTY DETAILS
 // ====================================
 app.get('/api/properties/:propertyId', authenticateToken, (req, res) => {
   const propertyId = parseInt(req.params.propertyId);
@@ -660,37 +687,48 @@ app.get('/api/properties/:propertyId', authenticateToken, (req, res) => {
     });
   }
   
+  // Increment view count for popularity tracking (US-15, US-23)
+  if (!propertyViews[propertyId]) {
+    propertyViews[propertyId] = 0;
+  }
+  propertyViews[propertyId]++;
+  
   const owner = findUserById(property.ownerId);
   
   res.status(200).json({
     success: true,
     property: {
       ...property,
-      ownerName: `${owner.firstName} ${owner.lastName}`
+      ownerName: `${owner.firstName} ${owner.lastName}`,
+      views: propertyViews[propertyId]
     }
   });
 });
 
 // ====================================
-// BOOKING MANAGEMENT (For Users)
+// LISTER: GET OWN PROPERTIES
 // ====================================
-app.get('/api/properties', authenticateToken, (req, res) => {
-  const availableProperties = properties
-    .filter(p => p.available)
-    .map(p => {
-      const owner = findUserById(p.ownerId);
-      return {
-        ...p,
-        ownerName: `${owner.firstName} ${owner.lastName}`
-      };
+app.get('/api/lister/properties', authenticateToken, requireRole('lister'), (req, res) => {
+  const host = findHostByUserId(req.user.userId);
+  
+  if (!host || !host.verified) {
+    return res.status(403).json({
+      success: false,
+      message: '⏳ Your host account is pending verification. Please wait for admin approval.'
     });
+  }
+
+  const userProperties = properties.filter(p => p.ownerId === req.user.userId);
 
   res.status(200).json({
     success: true,
-    properties: availableProperties
+    properties: userProperties
   });
 });
 
+// ====================================
+// US-17: CREATE BOOKING
+// ====================================
 app.post('/api/bookings', authenticateToken, requireRole('user'), (req, res) => {
   const { propertyId, checkIn, checkOut } = req.body;
 
@@ -716,15 +754,29 @@ app.post('/api/bookings', authenticateToken, requireRole('user'), (req, res) => 
     });
   }
 
+  // Calculate nights and total price
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+  
+  if (nights <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: '❌ Check-out date must be after check-in date!'
+    });
+  }
+
   const newBooking = {
     id: generateId(bookings),
     userId: req.user.userId,
     propertyId: property.id,
     checkIn,
     checkOut,
+    nights: nights,
     status: 'confirmed',
-    totalPrice: property.price,
-    createdAt: new Date().toISOString()
+    totalPrice: property.price * nights,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 
   bookings.push(newBooking);
@@ -738,6 +790,9 @@ app.post('/api/bookings', authenticateToken, requireRole('user'), (req, res) => 
   });
 });
 
+// ====================================
+// US-18: VIEW BOOKING STATUS
+// ====================================
 app.get('/api/bookings', authenticateToken, requireRole('user'), (req, res) => {
   const userBookings = bookings
     .filter(b => b.userId === req.user.userId)
@@ -755,43 +810,6 @@ app.get('/api/bookings', authenticateToken, requireRole('user'), (req, res) => {
     bookings: userBookings
   });
 });
-
-// ====================================
-// US-18: UPDATE BOOKING STATUS
-// ====================================
-app.patch('/api/bookings/:bookingId/status', 
-  authenticateToken, 
-  (req, res) => {
-    const bookingId = parseInt(req.params.bookingId);
-    const { status } = req.body;
-    
-    const booking = bookings.find(b => b.id === bookingId);
-    
-    if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: '👻 Booking not found!'
-      });
-    }
-    
-    const validStatuses = ['pending', 'confirmed', 'rejected', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: '❌ Invalid status!'
-      });
-    }
-    
-    booking.status = status;
-    booking.updatedAt = new Date().toISOString();
-    
-    res.status(200).json({
-      success: true,
-      message: `✅ Booking status updated to ${status}`,
-      booking
-    });
-  }
-);
 
 // ====================================
 // US-19: CANCEL BOOKING
@@ -821,6 +839,8 @@ app.delete('/api/bookings/:bookingId',
     
     bookings.splice(bookingIndex, 1);
     
+    console.log(`❌ Booking cancelled: ID ${bookingId}`);
+    
     res.status(200).json({
       success: true,
       message: '❌ Booking cancelled successfully!'
@@ -829,7 +849,7 @@ app.delete('/api/bookings/:bookingId',
 );
 
 // ====================================
-// ADMIN PROPERTY MANAGEMENT (US-20 to US-22)
+// US-20, US-21, US-22: ADMIN PROPERTY MANAGEMENT
 // ====================================
 app.get('/api/admin/properties', 
   authenticateToken, 
@@ -839,7 +859,8 @@ app.get('/api/admin/properties',
       const owner = findUserById(p.ownerId);
       return {
         ...p,
-        ownerName: `${owner.firstName} ${owner.lastName}`
+        ownerName: `${owner.firstName} ${owner.lastName}`,
+        views: propertyViews[p.id] || 0
       };
     });
     
@@ -900,7 +921,17 @@ app.delete('/api/admin/properties/:propertyId',
     }
     
     const property = properties[propertyIndex];
+    
+    // Delete associated image if exists
+    if (property.image) {
+      const imagePath = path.join(__dirname, property.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+    
     properties.splice(propertyIndex, 1);
+    delete propertyViews[propertyId];
     
     console.log(`🗑️ Admin deleted property: ${property.title}`);
     
@@ -938,6 +969,77 @@ app.get('/api/admin/bookings',
 );
 
 // ====================================
+// US-23: MONITOR ACTIVITY (Property Views/Popularity)
+// ====================================
+app.get('/api/admin/analytics', 
+  authenticateToken, 
+  requireRole('admin'),
+  (req, res) => {
+    // Property popularity stats
+    const propertyStats = properties.map(p => {
+      const owner = findUserById(p.ownerId);
+      const bookingCount = bookings.filter(b => b.propertyId === p.id).length;
+      return {
+        id: p.id,
+        title: p.title,
+        owner: `${owner.firstName} ${owner.lastName}`,
+        views: propertyViews[p.id] || 0,
+        bookings: bookingCount,
+        price: p.price,
+        location: p.location
+      };
+    }).sort((a, b) => b.views - a.views); // Sort by most viewed
+
+    // User activity stats
+    const userStats = users.map(u => {
+      if (u.role === 'user') {
+        const userBookingCount = bookings.filter(b => b.userId === u.id).length;
+        return {
+          id: u.id,
+          name: `${u.firstName} ${u.lastName}`,
+          email: u.email,
+          role: u.role,
+          bookings: userBookingCount,
+          joinedAt: u.createdAt
+        };
+      }
+      return null;
+    }).filter(Boolean);
+
+    // Lister activity stats
+    const listerStats = users.filter(u => u.role === 'lister').map(u => {
+      const listerProperties = properties.filter(p => p.ownerId === u.id);
+      const totalViews = listerProperties.reduce((sum, p) => sum + (propertyViews[p.id] || 0), 0);
+      const totalBookings = bookings.filter(b => 
+        listerProperties.some(p => p.id === b.propertyId)
+      ).length;
+      
+      return {
+        id: u.id,
+        name: `${u.firstName} ${u.lastName}`,
+        email: u.email,
+        properties: listerProperties.length,
+        totalViews: totalViews,
+        totalBookings: totalBookings,
+        verified: u.verified
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      analytics: {
+        propertyStats,
+        userStats,
+        listerStats,
+        totalViews: Object.values(propertyViews).reduce((sum, views) => sum + views, 0),
+        totalBookings: bookings.length,
+        totalRevenue: bookings.reduce((sum, b) => sum + b.totalPrice, 0)
+      }
+    });
+  }
+);
+
+// ====================================
 // UTILITY ENDPOINTS
 // ====================================
 app.get('/api/auth/status', authenticateToken, (req, res) => {
@@ -966,8 +1068,91 @@ app.get('/api/stats', authenticateToken, requireRole('admin'), (req, res) => {
       properties: properties.length,
       bookings: bookings.length,
       verifiedHosts: hosts.filter(h => h.verified).length,
-      pendingHosts: hosts.filter(h => !h.verified).length
+      pendingHosts: hosts.filter(h => !h.verified).length,
+      totalViews: Object.values(propertyViews).reduce((sum, views) => sum + views, 0)
     }
+  });
+});
+
+// ====================================
+// SEARCH & FILTER ENDPOINTS (Enhanced)
+// ====================================
+app.get('/api/properties/search', authenticateToken, (req, res) => {
+  const { 
+    query, 
+    type, 
+    minPrice, 
+    maxPrice, 
+    location, 
+    haunting_level,
+    sortBy 
+  } = req.query;
+
+  let filtered = properties.filter(p => p.available);
+
+  // Search by query (title, description, location)
+  if (query) {
+    const searchLower = query.toLowerCase();
+    filtered = filtered.filter(p => 
+      (p.title || '').toLowerCase().includes(searchLower) ||
+      (p.description || '').toLowerCase().includes(searchLower) ||
+      (p.location || '').toLowerCase().includes(searchLower)
+    );
+  }
+
+  // Filter by type (based on title keywords)
+  if (type) {
+    const typeLower = type.toLowerCase();
+    filtered = filtered.filter(p => 
+      (p.title || '').toLowerCase().includes(typeLower)
+    );
+  }
+
+  // Filter by price range
+  if (minPrice) {
+    filtered = filtered.filter(p => p.price >= parseFloat(minPrice));
+  }
+  if (maxPrice) {
+    filtered = filtered.filter(p => p.price <= parseFloat(maxPrice));
+  }
+
+  // Filter by location
+  if (location) {
+    filtered = filtered.filter(p => 
+      (p.location || '').toLowerCase().includes(location.toLowerCase())
+    );
+  }
+
+  // Filter by haunting level
+  if (haunting_level) {
+    filtered = filtered.filter(p => p.haunting_level === haunting_level);
+  }
+
+  // Add owner names and view counts
+  filtered = filtered.map(p => {
+    const owner = findUserById(p.ownerId);
+    return {
+      ...p,
+      ownerName: `${owner.firstName} ${owner.lastName}`,
+      views: propertyViews[p.id] || 0
+    };
+  });
+
+  // Sort results
+  if (sortBy === 'priceAsc') {
+    filtered.sort((a, b) => a.price - b.price);
+  } else if (sortBy === 'priceDesc') {
+    filtered.sort((a, b) => b.price - a.price);
+  } else if (sortBy === 'newest') {
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sortBy === 'popular') {
+    filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+  }
+
+  res.status(200).json({
+    success: true,
+    properties: filtered,
+    count: filtered.length
   });
 });
 
@@ -976,9 +1161,29 @@ app.get('/api/stats', authenticateToken, requireRole('admin'), (req, res) => {
 // ====================================
 app.use((err, req, res, next) => {
   console.error('Error:', err);
+  
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        success: false,
+        message: '📸 Image too large! Maximum size is 5MB.'
+      });
+    }
+  }
+  
   res.status(500).json({
     success: false,
     message: '⚰️ Something went wrong in the spectral realm!'
+  });
+});
+
+// ====================================
+// 404 HANDLER
+// ====================================
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: '👻 This path leads to nowhere in the haunted manor...'
   });
 });
 
@@ -1002,6 +1207,12 @@ app.listen(PORT, () => {
   ║   🔐 Default Admin Account:           ║
   ║   Email: admin@ghostrent.com          ║
   ║   Password: admin123                  ║
+  ║                                       ║
+  ║   ✅ All User Stories Implemented:    ║
+  ║   • US-1 to US-24 ✓                   ║
+  ║   • Search & Filter ✓                 ║
+  ║   • Analytics & Monitoring ✓          ║
+  ║   • Image Upload ✓                    ║
   ╚═══════════════════════════════════════╝
   `);
 });

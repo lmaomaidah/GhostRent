@@ -3,13 +3,407 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>GhostRent — Haunted Listings</title>
+  <title>GhostRent – Haunted Listings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&family=Griffy&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root{
+      --bg-midnight: #0a0f1a;
+      --bg-deep: #0d1b2a;
+      --bg-indigo: #102542;
+      --bg-ink: #1b263b;
+      --muted: #c3c8cc;
+      --accent: #6fb3d6;
+      --card-bg: rgba(14,18,24,0.7);
+      --glass-border: rgba(255,255,255,0.04);
+      --card-edge: rgba(255,255,255,0.02);
+    }
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&family=Griffy&family=Cinzel:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    * { box-sizing:border-box; margin:0; padding:0; }
+    
+    body {
+      font-family: 'Cinzel', serif;
+      background: linear-gradient(150deg, var(--bg-midnight), var(--bg-deep), var(--bg-indigo), var(--bg-ink));
+      color: var(--muted);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
 
-  <!-- Page CSS -->
-  <link rel="stylesheet" href="property-list.css">
+    .page-bg {
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 5%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.01), transparent 8%),
+        linear-gradient(180deg, rgba(255,255,255,0.01), transparent 25%);
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      filter: blur(1px) saturate(.95);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(3,6,12,0.35), rgba(2,4,8,0.55));
+      z-index: 0;
+    }
+
+    .container {
+      width: 92%;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      padding-top: 18px;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      padding: 6px 0 18px 0;
+    }
+    
+    .topbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.06);
+    }
+    
+    .site-name {
+      font-family: 'Griffy', cursive;
+      color: #e8f6fb;
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+    }
+
+    .nav a {
+      margin-left: 18px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 22px;
+      background: transparent;
+      transition: all .18s ease;
+      font-weight: 600;
+    }
+    
+    .nav a:hover {
+      background: rgba(255,255,255,0.02);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* HERO SECTION */
+    .hero {
+      padding: 18px 0 24px 0;
+    }
+    
+    .hero-inner {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: 12px;
+      padding: 28px;
+      margin-top: 6px;
+      box-shadow: 0 10px 30px rgba(2,6,12,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .hero-title {
+      font-family: 'Henny Penny', cursive;
+      color: #eef7f8;
+      font-size: 2.0rem;
+      letter-spacing: 1px;
+      text-align: center;
+      margin-bottom: 6px;
+      text-shadow: 0 0 12px rgba(120,190,220,0.04);
+    }
+    
+    .hero-sub {
+      text-align: center;
+      color: #bfc8c9;
+      margin-bottom: 12px;
+    }
+
+    /* SEARCH BAR */
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .search-bar .field {
+      min-width: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .search-bar label {
+      font-size: 0.8rem;
+      color: rgba(220,230,235,0.6);
+      font-weight: 600;
+    }
+    
+    .search-bar input,
+    .search-bar select {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+      background: rgba(4,8,12,0.55);
+      color: var(--muted);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.01);
+      outline: none;
+      font-family: 'Cinzel', serif;
+    }
+
+    .search-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(180deg, #143b55, #0c2b40);
+      color: #e7fbff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(30,80,110,0.12), 0 0 12px rgba(80,150,190,0.06) inset;
+      transition: transform 0.2s;
+      font-family: 'Cinzel', serif;
+    }
+    
+    .search-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* LISTING AREA */
+    .listing-area {
+      padding: 22px 0 80px 0;
+    }
+    
+    .list-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .results-count {
+      color: #bfc8c9;
+      font-weight: 600;
+    }
+    
+    .sort label {
+      margin-right: 8px;
+      color: #bfc8c9;
+    }
+    
+    .sort select {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #0b0e12;
+      border: 1px solid rgba(255,255,255,0.03);
+      color: var(--muted);
+      font-family: 'Cinzel', serif;
+    }
+
+    /* GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    /* CARD DESIGN */
+    .card {
+      background: linear-gradient(180deg, rgba(12,16,20,0.6), rgba(6,10,14,0.55));
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--card-edge);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6), inset 0 -4px 40px rgba(10,14,18,0.25);
+      transition: transform .22s cubic-bezier(.2,.9,.2,1), box-shadow .2s ease;
+      position: relative;
+      backdrop-filter: blur(4px);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.06)),
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,0.015), transparent 12%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.01), transparent 12%);
+      mix-blend-mode: overlay;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.75), 0 0 40px rgba(40,90,130,0.08);
+    }
+
+    .media {
+      position: relative;
+      height: 200px;
+      background: #0d0f11;
+      overflow: hidden;
+    }
+    
+    .media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(.85) saturate(.92) contrast(.95);
+      transition: transform 0.3s;
+    }
+    
+    .card:hover .media img {
+      transform: scale(1.05);
+    }
+    
+    .badge {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      background: rgba(255,255,255,0.04);
+      color: #eaf7fb;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      backdrop-filter: blur(4px);
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+    
+    .meta {
+      font-size: 0.8rem;
+      color: rgba(200,210,215,0.6);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .title {
+      font-family: 'Griffy', cursive;
+      font-size: 1.15rem;
+      color: #eef6f6;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+    
+    .specs {
+      font-size: 0.85rem;
+      color: #bfc8c9;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+    
+    .price {
+      font-weight: 700;
+      color: #dbeff6;
+      font-size: 1.1rem;
+    }
+    
+    .ghost-btn {
+      background: transparent;
+      border: 1px solid rgba(120,200,240,0.06);
+      color: #dfeff0;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: 'Cinzel', serif;
+      transition: all .18s ease;
+      text-shadow: 0 0 6px rgba(120,200,240,0.04);
+    }
+    
+    .ghost-btn:hover {
+      background: linear-gradient(180deg, rgba(120,200,240,0.03), rgba(60,140,160,0.02));
+      transform: translateY(-3px);
+    }
+
+    /* EMPTY STATE */
+    .empty,
+    .auth-warning {
+      padding: 40px;
+      text-align: center;
+      color: rgba(220,230,235,0.8);
+      background: rgba(8,12,16,0.25);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.02);
+      font-size: 1.1rem;
+    }
+
+    .empty a,
+    .auth-warning a {
+      color: #6fb3d6;
+      text-decoration: underline;
+    }
+
+    /* FOOTER */
+    .site-footer {
+      padding: 28px 0;
+      border-top: 1px solid rgba(255,255,255,0.02);
+      margin-top: 30px;
+      text-align: center;
+      color: #8f9a9a;
+      font-size: 0.95rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .hero-title {
+        font-size: 1.6rem;
+      }
+      .media {
+        height: 180px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .hero-inner {
+        padding: 18px;
+      }
+      .search-bar {
+        gap: 8px;
+      }
+      .hero-title {
+        font-size: 1.4rem;
+      }
+      .grid {
+        grid-template-columns: repeat(1, 1fr);
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="page-bg"></div>
@@ -22,7 +416,7 @@
         <span class="site-name">GhostRent</span>
       </div>
 
-      <nav class="nav" aria-label="Main navigation">
+      <nav class="nav">
         <a href="index.html">Home</a>
         <a href="property-list.html">Haunted Estates</a>
         <a href="index.html">Register</a>
@@ -33,37 +427,34 @@
 
   <section class="hero">
     <div class="container hero-inner">
-      <h1 class="hero-title">Your Reliable Ally in Worldwide Haunted Estates</h1>
-      <p class="hero-sub">Find the perfect cursed manor or cozy spectral cottage — if you dare.</p>
+      <h1 class="hero-title">Discover Your Perfect Haunted Estate</h1>
+      <p class="hero-sub">Browse our collection of spectral properties – from cursed cottages to possessed mansions</p>
 
-      <form id="searchForm" class="search-bar" role="search" aria-label="Search properties">
-        <!-- ADD SEARCH INPUT -->
+      <form id="searchForm" class="search-bar">
         <div class="field">
-          <label for="searchInput">Search</label>
+          <label for="searchInput">🔍 Search</label>
           <input 
             type="text" 
             id="searchInput" 
-            placeholder="Name or location..." 
-            style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(4,8,12,0.55);color:var(--muted);box-shadow:0 6px 18px rgba(0,0,0,0.45);outline:none;"
+            placeholder="Name or location..."
           >
         </div>
 
         <div class="field">
-          <label for="typeSelect">Type</label>
-          <select id="typeSelect" name="type">
-            <option value="">Any</option>
+          <label for="typeSelect">🏚️ Type</label>
+          <select id="typeSelect">
+            <option value="">Any Type</option>
             <option value="manor">Manor</option>
             <option value="cottage">Cottage</option>
-            <option value="vineyard">Vineyard</option>
-            <option value="coastal">Coastal</option>
             <option value="mansion">Mansion</option>
+            <option value="castle">Castle</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="priceSelect">Price</label>
-          <select id="priceSelect" name="price">
-            <option value="">Any</option>
+          <label for="priceSelect">💰 Price</label>
+          <select id="priceSelect">
+            <option value="">Any Price</option>
             <option value="0-2000">$0 - $2k</option>
             <option value="2000-5000">$2k - $5k</option>
             <option value="5000+">$5k+</option>
@@ -71,77 +462,78 @@
         </div>
 
         <div class="field">
-          <label for="areaSelect">Area</label>
-          <select id="areaSelect" name="area">
-            <option value="">Any</option>
+          <label for="areaSelect">📍 Location</label>
+          <select id="areaSelect">
+            <option value="">Any Location</option>
             <option value="New England">New England</option>
             <option value="Pacific">Pacific</option>
             <option value="Countryside">Countryside</option>
           </select>
         </div>
-        <button type="submit" class="search-btn">Search</button>
+        
+        <div class="field">
+          <label style="opacity:0">Search</label>
+          <button type="submit" class="search-btn">Search</button>
+        </div>
       </form>
     </div>
   </section>
 
-  <main class="container listing-area" id="mainListing">
+  <main class="container listing-area">
     <div class="list-controls">
-      <div class="results-count" id="resultsCount">Showing <strong>0</strong> haunted listings</div>
+      <div class="results-count">
+        Showing <strong id="resultsCount">0</strong> haunted listings
+      </div>
       <div class="sort">
-        <label for="sortSelect">Sort</label>
+        <label for="sortSelect">Sort by:</label>
         <select id="sortSelect">
           <option value="recommended">Recommended</option>
           <option value="priceAsc">Price: Low to High</option>
           <option value="priceDesc">Price: High to Low</option>
-          <option value="newest">Newest</option>
+          <option value="newest">Newest First</option>
+          <option value="popular">Most Popular</option>
         </select>
       </div>
     </div>
 
-    <section class="grid" id="listGrid" aria-live="polite">
-      <!-- cards will be injected here -->
+    <section class="grid" id="listGrid">
+      <!-- Cards will be injected here -->
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <p>© Phantom Systems — GhostRent. Enter at your own risk.</p>
+      <p>© Phantom Systems – GhostRent. Enter at your own risk.</p>
     </div>
   </footer>
 
   <script>
-    // ===========================
-    // property-list client script
-    // ===========================
-    // NOTE: fallbackImage uses the uploaded file path you provided.
-    // Keep this file available locally or replace with your hosted asset.
-    const fallbackImage = '/mnt/data/96470758-e747-4623-9801-06d84f758d53.jpg';
+    const fallbackImage = 'https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80';
 
-    // Query helper
-    const qs = (sel, ctx=document) => ctx.querySelector(sel);
-
-    // DOM refs
+    const qs = (sel, ctx = document) => ctx.querySelector(sel);
     const grid = qs('#listGrid');
-    const resultsCount = qs('#resultsCount strong');
+    const resultsCount = qs('#resultsCount');
     const searchForm = qs('#searchForm');
     const sortSelect = qs('#sortSelect');
 
-    // Store loaded properties
     let properties = [];
 
-    // Format currency
     function fmtPrice(p) {
       if (isNaN(p)) return p;
-      return (p).toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+      return new Intl.NumberFormat('en-US', { 
+        style: 'currency', 
+        currency: 'USD', 
+        maximumFractionDigits: 0 
+      }).format(p);
     }
 
-    // Create a single card DOM node
     function createCard(prop) {
       const article = document.createElement('article');
       article.className = 'card';
 
       const media = document.createElement('div');
       media.className = 'media';
+      
       const img = document.createElement('img');
       img.alt = prop.title || 'Haunted property';
       img.src = prop.image || fallbackImage;
@@ -150,7 +542,7 @@
 
       const badge = document.createElement('span');
       badge.className = 'badge';
-      badge.textContent = prop.available ? 'For Rent' : 'Unavailable';
+      badge.textContent = prop.available ? '✓ Available' : '✗ Unavailable';
       media.appendChild(badge);
 
       const body = document.createElement('div');
@@ -158,7 +550,7 @@
 
       const meta = document.createElement('div');
       meta.className = 'meta';
-      meta.textContent = prop.location || 'Unknown location';
+      meta.innerHTML = `📍 ${prop.location || 'Unknown location'}`;
       body.appendChild(meta);
 
       const h3 = document.createElement('h3');
@@ -168,9 +560,9 @@
 
       const specs = document.createElement('p');
       specs.className = 'specs';
-      const haunting = prop.haunting_level ? `Haunt: ${prop.haunting_level}` : '';
-      const owner = prop.ownerName ? `Owner: ${prop.ownerName}` : '';
-      specs.innerHTML = `${haunting} ${owner ? '· ' + owner : ''}`;
+      const haunting = prop.haunting_level ? `👻 ${prop.haunting_level} haunting` : '';
+      const owner = prop.ownerName ? `🔮 Host: ${prop.ownerName}` : '';
+      specs.innerHTML = `${haunting}${haunting && owner ? ' • ' : ''}${owner}`;
       body.appendChild(specs);
 
       const footer = document.createElement('div');
@@ -178,11 +570,11 @@
 
       const price = document.createElement('div');
       price.className = 'price';
-      price.textContent = fmtPrice(prop.price || 0);
+      price.textContent = `${fmtPrice(prop.price || 0)}/month`;
       footer.appendChild(price);
 
       const btn = document.createElement('button');
-      btn.className = 'btn ghost-btn';
+      btn.className = 'ghost-btn';
       btn.type = 'button';
       btn.textContent = 'View Details';
       btn.addEventListener('click', () => {
@@ -191,54 +583,55 @@
       footer.appendChild(btn);
 
       body.appendChild(footer);
-
       article.appendChild(media);
       article.appendChild(body);
 
       return article;
     }
 
-    // Render properties array to DOM
     function renderList(list) {
       grid.innerHTML = '';
+      
       if (!list.length) {
-        grid.innerHTML = '<div class="empty">No haunted listings found.</div>';
+        grid.innerHTML = '<div class="empty">👻 No haunted listings found matching your criteria.</div>';
         resultsCount.textContent = 0;
         return;
       }
+      
       const frag = document.createDocumentFragment();
       list.forEach(p => frag.appendChild(createCard(p)));
       grid.appendChild(frag);
       resultsCount.textContent = list.length;
     }
 
-    // Fetch properties from backend
     async function fetchProperties() {
       try {
         const res = await fetch('/api/properties', {
           method: 'GET',
           headers: { 'Accept': 'application/json' },
-          credentials: 'same-origin' // ensures cookies (ghostToken) are sent
+          credentials: 'same-origin'
         });
 
         if (res.status === 401 || res.status === 403) {
-          // Not authenticated — show friendly prompt
           grid.innerHTML = `
             <div class="auth-warning">
-              <p>You must be logged in to view haunted listings. <a href="loginpage.html">Log in</a> or <a href="index.html">Register</a> to continue.</p>
+              <p>👻 You must be logged in to view haunted listings.</p>
+              <p style="margin-top: 12px;">
+                <a href="loginpage.html">Log in</a> or <a href="index.html">Register</a> to continue your spectral journey.
+              </p>
             </div>`;
           resultsCount.textContent = 0;
           return;
         }
 
         const data = await res.json();
+        
         if (!data.success || !Array.isArray(data.properties)) {
-          grid.innerHTML = '<div class="empty">No haunted listings available right now.</div>';
+          grid.innerHTML = '<div class="empty">🌙 No haunted listings available right now. Check back soon!</div>';
           resultsCount.textContent = 0;
           return;
         }
 
-        // insert ownerName if backend didn't provide it (defensive)
         properties = data.properties.map(p => ({
           id: p.id,
           title: p.title,
@@ -247,68 +640,82 @@
           price: p.price,
           haunting_level: p.haunting_level,
           ownerId: p.ownerId,
-          ownerName: p.ownerName || '',
+          ownerName: p.ownerName || 'Unknown Host',
           available: p.available,
-          image: p.image || '' // backend currently doesn't provide image; keep empty
+          image: p.image || '',
+          createdAt: p.createdAt,
+          views: p.views || 0
         }));
 
         renderList(properties);
 
       } catch (err) {
         console.error('Fetch error', err);
-        grid.innerHTML = '<div class="empty">Could not connect to the realm. Try again later.</div>';
+        grid.innerHTML = '<div class="empty">⚰️ Could not connect to the realm. Try again later.</div>';
       }
     }
 
-    // Basic client filtering (search form) & sorting
     function applyFilters(e) {
       if (e) e.preventDefault();
       
-      const searchQuery = qs('#searchInput').value.toLowerCase(); // ADD THIS
-      const type = qs('#typeSelect').value;
+      const searchQuery = qs('#searchInput').value.toLowerCase();
+      const type = qs('#typeSelect').value.toLowerCase();
       const price = qs('#priceSelect').value;
       const area = qs('#areaSelect').value;
+      
       let filtered = properties.slice();
 
-      // ADD SEARCH FILTER
       if (searchQuery) {
         filtered = filtered.filter(p => 
           (p.title || '').toLowerCase().includes(searchQuery) ||
-          (p.location || '').toLowerCase().includes(searchQuery)
+          (p.location || '').toLowerCase().includes(searchQuery) ||
+          (p.description || '').toLowerCase().includes(searchQuery)
         );
       }
 
-      // Filter by type (ADD THIS)
       if (type) {
         filtered = filtered.filter(p => 
-          (p.title || '').toLowerCase().includes(type.toLowerCase())
+          (p.title || '').toLowerCase().includes(type)
         );
       }
 
-      // Filter by area/location rough match
-      if (area) filtered = filtered.filter(p => (p.location||'').toLowerCase().includes(area.toLowerCase()));
-
-      // Filter by price range
-      if (price) {
-        if (price === '0-2000') filtered = filtered.filter(p => p.price <= 2000);
-        if (price === '2000-5000') filtered = filtered.filter(p => p.price > 2000 && p.price <= 5000);
-        if (price === '5000+') filtered = filtered.filter(p => p.price > 5000);
+      if (area) {
+        filtered = filtered.filter(p => 
+          (p.location || '').toLowerCase().includes(area.toLowerCase())
+        );
       }
 
-      // Sort
+      if (price) {
+        if (price === '0-2000') {
+          filtered = filtered.filter(p => p.price <= 2000);
+        } else if (price === '2000-5000') {
+          filtered = filtered.filter(p => p.price > 2000 && p.price <= 5000);
+        } else if (price === '5000+') {
+          filtered = filtered.filter(p => p.price > 5000);
+        }
+      }
+
       const sort = sortSelect.value;
-      if (sort === 'priceAsc') filtered.sort((a,b)=>a.price-b.price);
-      if (sort === 'priceDesc') filtered.sort((a,b)=>b.price-a.price);
-      if (sort === 'newest') filtered.sort((a,b)=>new Date(b.createdAt) - new Date(a.createdAt));
+      if (sort === 'priceAsc') {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (sort === 'priceDesc') {
+        filtered.sort((a, b) => b.price - a.price);
+      } else if (sort === 'newest') {
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } else if (sort === 'popular') {
+        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+      }
 
       renderList(filtered);
     }
 
-    // Event listeners
     searchForm.addEventListener('submit', applyFilters);
     sortSelect.addEventListener('change', applyFilters);
+    qs('#searchInput').addEventListener('input', applyFilters);
+    qs('#typeSelect').addEventListener('change', applyFilters);
+    qs('#priceSelect').addEventListener('change', applyFilters);
+    qs('#areaSelect').addEventListener('change', applyFilters);
 
-    // Initial fetch
     fetchProperties();
   </script>
 </body>

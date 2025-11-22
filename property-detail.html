@@ -3,203 +3,365 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GhostRent — Property Details</title>
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&family=Griffy&family=Cinzel:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <title>GhostRent – Property Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&family=Griffy&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
-    /* SAME THEME / SAME VARIABLES */
-    :root{
+    :root {
       --bg-midnight: #0a0f1a;
       --bg-deep: #0d1b2a;
       --bg-indigo: #102542;
       --bg-ink: #1b263b;
       --muted: #c3c8cc;
       --accent: #6fb3d6;
-      --card-bg: rgba(14,18,24,0.7);
-      --glass-border: rgba(255,255,255,0.04);
-      --card-edge: rgba(255,255,255,0.02);
     }
 
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{
-      font-family:'Cinzel',serif;
-      background:linear-gradient(150deg,var(--bg-midnight),var(--bg-deep),var(--bg-indigo),var(--bg-ink));
-      color:var(--muted);
-      min-height:100vh;
-      overflow-x:hidden;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Cinzel', serif;
+      background: linear-gradient(150deg, var(--bg-midnight), var(--bg-deep), var(--bg-indigo), var(--bg-ink));
+      color: var(--muted);
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    .page-bg{
+    .page-bg {
       background:
         radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 5%),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.01), transparent 8%),
-        linear-gradient(180deg, rgba(255,255,255,0.01), transparent 25%);
-      position:fixed;
-      inset:0;
-      z-index:0;
-      filter: blur(1px) saturate(.95);
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.01), transparent 8%);
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      filter: blur(1px);
     }
-    .overlay{
-      position:fixed;inset:0;background:linear-gradient(90deg,rgba(3,6,12,0.35),rgba(2,4,8,0.55));
-      z-index:0;
+    
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(3,6,12,0.35), rgba(2,4,8,0.55));
+      z-index: 0;
     }
 
-    .container{
-      width:92%;
-      max-width:1200px;
-      margin:0 auto;
-      position:relative;
-      z-index:2;
-      padding-top:20px;
+    .container {
+      width: 92%;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      padding-top: 20px;
     }
 
     /* HEADER */
-    header{padding:12px 0 20px 0}
-    header .container{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+    header {
+      padding: 12px 0 20px 0;
+    }
+    
+    header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.06)}
-    .site-name{font-family:'Griffy',cursive;color:#e8f6fb;font-size:1.2rem;letter-spacing:2px}
-
-    .nav a{
-      margin-left:18px;
-      color:var(--muted);
-      text-decoration:none;
-      padding:8px 14px;
-      border-radius:22px;
-      transition:.2s;
-      font-weight:600;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    .nav a:hover{background:rgba(255,255,255,0.02);color:#fff;transform:translateY(-2px)}
-
-    /* MAIN CONTENT */
-    .detail-header{
-      margin-top:10px;
-      text-align:center;
+    
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.06);
     }
-    .detail-title{
-      font-family:'Henny Penny',cursive;
-      font-size:2.2rem;
-      color:#e8f6fb;
-      text-shadow:0 0 12px rgba(120,190,220,0.1);
-    }
-    .detail-location{
-      margin-top:6px;
-      font-size:1rem;
-      color:#bfc8c9;
+    
+    .site-name {
+      font-family: 'Griffy', cursive;
+      color: #e8f6fb;
+      font-size: 1.2rem;
+      letter-spacing: 2px;
     }
 
-    /* IMAGE SECTION */
-    .gallery{
-      margin-top:25px;
-      display:flex;
-      gap:20px;
-      flex-wrap:wrap;
-      justify-content:center;
+    .nav a {
+      margin-left: 18px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 22px;
+      transition: .2s;
+      font-weight: 600;
     }
-    .gallery img{
-      width:100%;
-      max-width:700px;
-      border-radius:16px;
-      border:1px solid var(--glass-border);
-      box-shadow:0 10px 40px rgba(0,0,0,0.7);
-      object-fit:cover;
+    
+    .nav a:hover {
+      background: rgba(255,255,255,0.02);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* BACK BUTTON */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #6fb3d6;
+      text-decoration: none;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      transition: transform 0.2s;
+    }
+    
+    .back-link:hover {
+      transform: translateX(-4px);
+    }
+
+    /* HEADER */
+    .detail-header {
+      margin-top: 10px;
+      text-align: center;
+    }
+    
+    .detail-title {
+      font-family: 'Henny Penny', cursive;
+      font-size: 2.4rem;
+      color: #e8f6fb;
+      text-shadow: 0 0 12px rgba(120,190,220,0.1);
+      margin-bottom: 12px;
+    }
+    
+    .detail-location {
+      font-size: 1.1rem;
+      color: #bfc8c9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    /* GALLERY */
+    .gallery {
+      margin-top: 30px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .gallery img {
+      width: 100%;
+      max-width: 800px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      object-fit: cover;
+      max-height: 500px;
+    }
+
+    /* CONTENT LAYOUT */
+    .content-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+      margin-top: 30px;
     }
 
     /* DETAILS BOX */
-    .detail-box{
-      margin-top:30px;
-      background:linear-gradient(180deg,rgba(12,16,20,0.6),rgba(6,10,14,0.55));
-      border:1px solid var(--card-edge);
-      padding:24px;
-      border-radius:14px;
-      box-shadow:0 8px 28px rgba(0,0,0,0.6), inset 0 -4px 40px rgba(10,14,18,0.25);
-      backdrop-filter:blur(4px);
+    .detail-box {
+      background: linear-gradient(180deg, rgba(12,16,20,0.6), rgba(6,10,14,0.55));
+      border: 1px solid rgba(255,255,255,0.02);
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
     }
 
-    .detail-box h2{
-      font-family:'Griffy',cursive;
-      font-size:1.5rem;
-      margin-bottom:12px;
-      color:#eef6f6;
+    .detail-box h2 {
+      font-family: 'Griffy', cursive;
+      font-size: 1.6rem;
+      margin-bottom: 16px;
+      color: #eef6f6;
     }
 
-    .detail-box p{
-      line-height:1.6;
-      margin-bottom:12px;
-      color:#bfc8c9;
-      font-size:1rem;
+    .detail-box p {
+      line-height: 1.7;
+      margin-bottom: 16px;
+      color: #bfc8c9;
+      font-size: 1rem;
     }
 
     /* INFO GRID */
-    .info-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:16px;
-      margin-top:15px;
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 20px;
     }
 
-    .info-item{
-      background:rgba(255,255,255,0.03);
-      padding:14px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.04);
-      text-align:center;
-      font-size:0.95rem;
+    .info-item {
+      background: rgba(255,255,255,0.03);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+      text-align: center;
     }
 
-    .info-label{color:#9fb1bb;font-size:0.8rem}
-    .info-value{color:#e7faff;font-weight:700;font-size:1.1rem;margin-top:4px}
+    .info-label {
+      color: #9fb1bb;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+    
+    .info-value {
+      color: #e7faff;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
     /* BOOKING BOX */
-    .booking{
-      margin-top:30px;
-      padding:22px;
-      border-radius:14px;
-      background:rgba(255,255,255,0.03);
-      border:1px solid rgba(255,255,255,0.04);
-      text-align:center;
+    .booking {
+      background: linear-gradient(180deg, rgba(12,16,20,0.6), rgba(6,10,14,0.55));
+      padding: 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.02);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      position: sticky;
+      top: 20px;
     }
 
-    .price-big{
-      font-size:2rem;
-      font-weight:700;
-      color:#dbeff6;
-      margin-bottom:16px;
+    .price-big {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #dbeff6;
+      margin-bottom: 8px;
+      text-align: center;
     }
 
-    .ghost-btn{
-      padding:12px 20px;
-      font-size:1rem;
-      background:transparent;
-      border:1px solid rgba(120,200,240,0.06);
-      color:#dfeff0;
-      border-radius:10px;
-      cursor:pointer;
-      transition:.18s;
-      font-family:'Cinzel',serif;
-    }
-    .ghost-btn:hover{
-      background:linear-gradient(180deg,rgba(120,200,240,0.03),rgba(60,140,160,0.02));
-      transform:translateY(-3px)
+    .price-label {
+      text-align: center;
+      color: #9fb1bb;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
     }
 
-    footer{
-      text-align:center;
-      padding:30px 0;
-      margin-top:40px;
-      color:#8f9a9a;
-      font-size:0.95rem;
-      border-top:1px solid rgba(255,255,255,0.03);
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #bfc8c9;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      background: rgba(4,8,12,0.55);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 8px;
+      color: #e7faff;
+      font-family: 'Cinzel', serif;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: rgba(120,200,240,0.2);
+    }
+
+    .ghost-btn {
+      width: 100%;
+      padding: 14px 20px;
+      font-size: 1.05rem;
+      background: linear-gradient(180deg, #143b55, #0c2b40);
+      border: 1px solid rgba(120,200,240,0.06);
+      color: #e7fbff;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: .18s;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(30,80,110,0.12);
+    }
+    
+    .ghost-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(30,80,110,0.2);
+    }
+
+    .ghost-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .total-price {
+      text-align: center;
+      color: #51cf66;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 16px 0;
+      padding: 12px;
+      background: rgba(81,207,102,0.05);
+      border-radius: 8px;
+    }
+
+    /* HOST INFO */
+    .host-info {
+      background: rgba(255,255,255,0.02);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .host-info h3 {
+      font-family: 'Griffy', cursive;
+      color: #eef6f6;
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+    }
+
+    .host-info p {
+      color: #bfc8c9;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      margin-top: 60px;
+      color: #8f9a9a;
+      font-size: 0.95rem;
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .content-wrapper {
+        grid-template-columns: 1fr;
+      }
+      
+      .booking {
+        position: static;
+      }
+      
+      .detail-title {
+        font-size: 1.8rem;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
-
 </head>
 <body>
   <div class="page-bg"></div>
@@ -208,7 +370,7 @@
   <header>
     <div class="container">
       <div class="brand">
-        <img src="logo.png" class="logo">
+        <img src="logo.png" class="logo" alt="GhostRent Logo">
         <span class="site-name">GhostRent</span>
       </div>
 
@@ -222,149 +384,258 @@
   </header>
 
   <main class="container">
+    <a href="property-list.html" class="back-link">← Back to Listings</a>
 
     <div class="detail-header">
-      <h1 class="detail-title">The Whispering Hollow Manor</h1>
-      <p class="detail-location">Old Countryside · Level 4 Haunting</p>
-    </div>
-
-    <!-- IMAGE -->
-    <div class="gallery">
-      <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1500&q=80" alt="Manor Image">
-    </div>
-
-    <!-- DETAILS -->
-    <section class="detail-box">
-      <h2>About This Property</h2>
-      <p>
-        A chilling 19th-century manor known for soft whispers in the hallways and
-        a friendly (mostly) apparition that roams the eastern wing. Perfect for
-        thrill-seekers, paranormal researchers, or anyone who loves atmospheric
-        living spaces with character… lots of character.
-      </p>
-
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">Haunting Level</div>
-          <div class="info-value">4</div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-label">Owner</div>
-          <div class="info-value">Eleanor Graves</div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-label">Area</div>
-          <div class="info-value">Countryside</div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-label">Status</div>
-          <div class="info-value">Available</div>
-        </div>
+      <h1 class="detail-title" id="propertyTitle">Loading...</h1>
+      <div class="detail-location" id="propertyLocation">
+        <span>📍 Location</span>
+        <span>•</span>
+        <span>👻 Haunting Level</span>
       </div>
-    </section>
+    </div>
 
-    <!-- BOOKING SECTION -->
-    <section class="booking">
-      <div class="price-big">$3,200 / month</div>
-      <button class="ghost-btn">Book This Property</button>
-    </section>
+    <div class="gallery" id="propertyGallery">
+      <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1500&q=80" alt="Property Image" id="propertyImage">
+    </div>
 
+    <div class="content-wrapper">
+      <div>
+        <section class="detail-box">
+          <h2>About This Property</h2>
+          <p id="propertyDescription">
+            Loading property details...
+          </p>
+
+          <div class="info-grid" id="propertyInfoGrid">
+            <!-- Info items will be injected here -->
+          </div>
+        </section>
+      </div>
+
+      <aside class="sidebar">
+        <div class="booking" id="bookingBox">
+          <div class="price-big" id="propertyPrice">$0</div>
+          <div class="price-label">per month</div>
+          
+          <form id="bookingForm">
+            <div class="form-group">
+              <label for="checkIn">📅 Check-in Date</label>
+              <input type="date" id="checkIn" required>
+            </div>
+
+            <div class="form-group">
+              <label for="checkOut">📅 Check-out Date</label>
+              <input type="date" id="checkOut" required>
+            </div>
+
+            <div class="total-price" id="totalPrice" style="display: none;">
+              Total: $0
+            </div>
+
+            <button type="submit" class="ghost-btn" id="bookBtn">
+              👻 Book This Haunt
+            </button>
+          </form>
+        </div>
+
+        <div class="host-info" id="hostInfo">
+          <h3>👤 Your Host</h3>
+          <p id="hostName">Unknown Host</p>
+        </div>
+      </aside>
+    </div>
   </main>
 
   <footer>
-    © Phantom Systems — GhostRent. Enter at your own risk.
+    © Phantom Systems – GhostRent. Enter at your own risk.
   </footer>
-<script>
-// Get property ID from URL
-const urlParams = new URLSearchParams(window.location.search);
-const propertyId = urlParams.get('id');
 
-if (!propertyId) {
-  alert('No property specified!');
-  window.location.href = 'property-list.html';
-}
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const propertyId = urlParams.get('id');
 
-// Fetch property details
-async function loadPropertyDetails() {
-  try {
-    const res = await fetch(`/api/properties/${propertyId}`, {
-      credentials: 'same-origin'
-    });
-    
-    if (!res.ok) {
-      throw new Error('Property not found');
+    if (!propertyId) {
+      alert('No property specified!');
+      window.location.href = 'property-list.html';
     }
-    
-    const data = await res.json();
-    if (!data.success) {
-      throw new Error(data.message);
+
+    let currentProperty = null;
+    let userRole = null;
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/status', {
+          credentials: 'same-origin'
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            userRole = data.user.role;
+          }
+        }
+      } catch (err) {
+        console.log('Not authenticated');
+      }
     }
-    
-    const property = data.property;
-    
-    // Update page content
-    document.querySelector('.detail-title').textContent = property.title;
-    document.querySelector('.detail-location').textContent = `${property.location} · Level ${property.haunting_level || 'Unknown'} Haunting`;
-    
-    // Update description
-    document.querySelector('.detail-box p').textContent = property.description;
-    
-    // Update info grid
-    document.querySelector('.info-grid').innerHTML = `
-      <div class="info-item">
-        <div class="info-label">Haunting Level</div>
-        <div class="info-value">${property.haunting_level || 'N/A'}</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Owner</div>
-        <div class="info-value">${property.ownerName || 'Unknown'}</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Area</div>
-        <div class="info-value">${property.location || 'Unknown'}</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Status</div>
-        <div class="info-value">${property.available ? 'Available' : 'Unavailable'}</div>
-      </div>
-    `;
-    
-    // Update price
-    document.querySelector('.price-big').textContent = `$${property.price.toLocaleString()} / month`;
-    
-    // Update image if available
-    if (property.image) {
-      document.querySelector('.gallery img').src = property.image;
+
+    async function loadPropertyDetails() {
+      try {
+        const res = await fetch(`/api/properties/${propertyId}`, {
+          credentials: 'same-origin'
+        });
+        
+        if (!res.ok) {
+          throw new Error('Property not found');
+        }
+        
+        const data = await res.json();
+        if (!data.success) {
+          throw new Error(data.message);
+        }
+        
+        currentProperty = data.property;
+        displayProperty(currentProperty);
+        
+      } catch (error) {
+        console.error('Error loading property:', error);
+        alert('Failed to load property details');
+        window.location.href = 'property-list.html';
+      }
     }
-    
-    // Add booking functionality
-    const bookBtn = document.querySelector('.ghost-btn');
-    if (property.available) {
-      bookBtn.textContent = 'Book This Property';
-      bookBtn.addEventListener('click', () => {
-        // For now, redirect to user dashboard
-        // Later: window.location.href = `booking.html?propertyId=${propertyId}`;
-        alert(`Booking feature coming soon for: ${property.title}`);
+
+    function displayProperty(property) {
+      document.getElementById('propertyTitle').textContent = property.title;
+      
+      document.getElementById('propertyLocation').innerHTML = `
+        <span>📍 ${property.location || 'Unknown'}</span>
+        <span>•</span>
+        <span>👻 ${property.haunting_level || 'Unknown'} haunting</span>
+      `;
+      
+      document.getElementById('propertyDescription').textContent = 
+        property.description || 'No description available.';
+      
+      const priceFormatted = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(property.price || 0);
+      
+      document.getElementById('propertyPrice').textContent = priceFormatted;
+      
+      if (property.image) {
+        document.getElementById('propertyImage').src = property.image;
+      }
+      
+      document.getElementById('propertyInfoGrid').innerHTML = `
+        <div class="info-item">
+          <div class="info-label">Haunting Level</div>
+          <div class="info-value">${property.haunting_level || 'N/A'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Status</div>
+          <div class="info-value">${property.available ? '✓ Available' : '✗ Unavailable'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Location</div>
+          <div class="info-value">${property.location || 'Unknown'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Price</div>
+          <div class="info-value">${priceFormatted}</div>
+        </div>
+      `;
+      
+      document.getElementById('hostName').textContent = property.ownerName || 'Unknown Host';
+      
+      setupBookingForm(property);
+    }
+
+    function setupBookingForm(property) {
+      const bookBtn = document.getElementById('bookBtn');
+      const checkInInput = document.getElementById('checkIn');
+      const checkOutInput = document.getElementById('checkOut');
+      const totalPriceDiv = document.getElementById('totalPrice');
+      
+      const today = new Date().toISOString().split('T')[0];
+      checkInInput.setAttribute('min', today);
+      checkOutInput.setAttribute('min', today);
+      
+      if (!property.available) {
+        bookBtn.textContent = 'Unavailable';
+        bookBtn.disabled = true;
+        checkInInput.disabled = true;
+        checkOutInput.disabled = true;
+        return;
+      }
+      
+      if (userRole !== 'user') {
+        bookBtn.textContent = userRole === 'lister' ? 'Hosts Cannot Book' : 'Login as User to Book';
+        bookBtn.disabled = true;
+        return;
+      }
+      
+      function calculateTotal() {
+        const checkIn = new Date(checkInInput.value);
+        const checkOut = new Date(checkOutInput.value);
+        
+        if (checkIn && checkOut && checkOut > checkIn) {
+          const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+          const total = nights * property.price;
+          
+          totalPriceDiv.style.display = 'block';
+          totalPriceDiv.textContent = `Total: ${new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+          }).format(total)} (${nights} nights)`;
+        } else {
+          totalPriceDiv.style.display = 'none';
+        }
+      }
+      
+      checkInInput.addEventListener('change', calculateTotal);
+      checkOutInput.addEventListener('change', calculateTotal);
+      
+      document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const bookingData = {
+          propertyId: property.id,
+          checkIn: checkInInput.value,
+          checkOut: checkOutInput.value
+        };
+        
+        try {
+          const res = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(bookingData)
+          });
+          
+          const data = await res.json();
+          
+          if (data.success) {
+            alert('🎃 ' + data.message);
+            window.location.href = 'dashboard-user.html';
+          } else {
+            alert('⚰️ ' + data.message);
+          }
+        } catch (error) {
+          console.error('Booking error:', error);
+          alert('⚰️ Failed to create booking');
+        }
       });
-    } else {
-      bookBtn.textContent = 'Unavailable';
-      bookBtn.disabled = true;
-      bookBtn.style.opacity = '0.5';
-      bookBtn.style.cursor = 'not-allowed';
     }
-    
-  } catch (error) {
-    console.error('Error loading property:', error);
-    alert('Failed to load property details');
-    window.location.href = 'property-list.html';
-  }
-}
 
-loadPropertyDetails();
-</script>
+    async function init() {
+      await checkAuth();
+      await loadPropertyDetails();
+    }
 
+    init();
+  </script>
 </body>
 </html>
