@@ -37,14 +37,26 @@
       <p class="hero-sub">Find the perfect cursed manor or cozy spectral cottage — if you dare.</p>
 
       <form id="searchForm" class="search-bar" role="search" aria-label="Search properties">
+        <!-- ADD SEARCH INPUT -->
+        <div class="field">
+          <label for="searchInput">Search</label>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Name or location..." 
+            style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(4,8,12,0.55);color:var(--muted);box-shadow:0 6px 18px rgba(0,0,0,0.45);outline:none;"
+          >
+        </div>
+
         <div class="field">
           <label for="typeSelect">Type</label>
           <select id="typeSelect" name="type">
             <option value="">Any</option>
-            <option>Manor</option>
-            <option>Cottage</option>
-            <option>Vineyard</option>
-            <option>Coastal</option>
+            <option value="manor">Manor</option>
+            <option value="cottage">Cottage</option>
+            <option value="vineyard">Vineyard</option>
+            <option value="coastal">Coastal</option>
+            <option value="mansion">Mansion</option>
           </select>
         </div>
 
@@ -62,12 +74,11 @@
           <label for="areaSelect">Area</label>
           <select id="areaSelect" name="area">
             <option value="">Any</option>
-            <option>New England</option>
-            <option>Pacific</option>
-            <option>Countryside</option>
+            <option value="New England">New England</option>
+            <option value="Pacific">Pacific</option>
+            <option value="Countryside">Countryside</option>
           </select>
         </div>
-
         <button type="submit" class="search-btn">Search</button>
       </form>
     </div>
@@ -175,9 +186,7 @@
       btn.type = 'button';
       btn.textContent = 'View Details';
       btn.addEventListener('click', () => {
-        // Replace with detail page route when ready:
-        // e.g. window.location.href = `/property/${prop.id}`
-        alert(`Open details for "${prop.title}" (placeholder).`);
+        window.location.href = `property-detail.html?id=${prop.id}`;
       });
       footer.appendChild(btn);
 
@@ -254,10 +263,27 @@
     // Basic client filtering (search form) & sorting
     function applyFilters(e) {
       if (e) e.preventDefault();
+      
+      const searchQuery = qs('#searchInput').value.toLowerCase(); // ADD THIS
       const type = qs('#typeSelect').value;
       const price = qs('#priceSelect').value;
       const area = qs('#areaSelect').value;
       let filtered = properties.slice();
+
+      // ADD SEARCH FILTER
+      if (searchQuery) {
+        filtered = filtered.filter(p => 
+          (p.title || '').toLowerCase().includes(searchQuery) ||
+          (p.location || '').toLowerCase().includes(searchQuery)
+        );
+      }
+
+      // Filter by type (ADD THIS)
+      if (type) {
+        filtered = filtered.filter(p => 
+          (p.title || '').toLowerCase().includes(type.toLowerCase())
+        );
+      }
 
       // Filter by area/location rough match
       if (area) filtered = filtered.filter(p => (p.location||'').toLowerCase().includes(area.toLowerCase()));

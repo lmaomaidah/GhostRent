@@ -116,25 +116,21 @@
       font-style: italic;
     }
     body {
-        min-height: 100vh;
-        overflow-y: auto;
-        margin: 0;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
     }
 
     main {
-        max-height: calc(100vh - 60px); /* Subtract navbar height */
-        overflow-y: auto;
         padding: 20px;
+        min-height: calc(100vh - 140px);
     }
 
-    .content-section {
-        margin-top: 40px;
-        padding: 20px;
-        background: rgba(28, 31, 38, 0.8);
-        border-radius: 15px;
-        max-width: 1200px;
-        overflow-y: auto; /* Enable section scrolling */
-        margin-bottom: 40px; /* Add space at bottom */
+    .properties-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
     }
 
     .pending-hosts-table {
@@ -158,6 +154,8 @@
       <li><a href="#" onclick="showSection('stats')">Dashboard</a></li>
       <li><a href="#" onclick="showSection('pending')">Approve Listings</a></li>
       <li><a href="#" onclick="showSection('users')">Manage Users</a></li>
+      <li><a href="#" onclick="showSection('properties')">Manage Properties</a></li>
+      <li><a href="#" onclick="showSection('bookings')">View Bookings</a></li>
       <li><a href="#" onclick="logout()">Logout</a></li>
     </ul>
   </nav>
@@ -197,6 +195,22 @@
           <h3 class="section-title">👥 All Users</h3>
           <div id="users-container">
             <div class="loading">Gathering all spirits...</div>
+          </div>
+        </div>
+
+        <!-- Properties Section -->
+        <div id="properties-section" style="display: none;">
+          <h3 class="section-title">🏚️ All Properties</h3>
+          <div id="properties-container">
+            <div class="loading">Loading haunted estates...</div>
+          </div>
+        </div>
+
+        <!-- Bookings Section -->
+        <div id="bookings-section" style="display: none;">
+          <h3 class="section-title">📅 All Bookings</h3>
+          <div id="bookings-container">
+            <div class="loading">Loading booking records...</div>
           </div>
         </div>
       </div>
@@ -426,6 +440,8 @@
       document.getElementById('stats-section').style.display = 'none';
       document.getElementById('pending-section').style.display = 'none';
       document.getElementById('users-section').style.display = 'none';
+      document.getElementById('properties-section').style.display = 'none';
+      document.getElementById('bookings-section').style.display = 'none';
       
       // Show selected section
       if (section === 'stats') {
@@ -437,6 +453,149 @@
       } else if (section === 'users') {
         document.getElementById('users-section').style.display = 'block';
         loadUsers();
+      } else if (section === 'properties') {
+        document.getElementById('properties-section').style.display = 'block';
+        loadAllProperties();
+      } else if (section === 'bookings') {
+        document.getElementById('bookings-section').style.display = 'block';
+        loadAllBookings();
+      }
+    }
+    // Load all properties (Admin)
+async function loadAllProperties() {
+  try {
+    const response = await fetch('/api/admin/properties');
+    const data = await response.json();
+    
+    const container = document.getElementById('properties-container');
+    
+    if (data.success && data.properties.length > 0) {
+      container.innerHTML = `
+        <table class="pending-hosts-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Location</th>
+              <th>Owner</th>
+              <th>Price</th>
+              <th>Haunting</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.properties.map(prop => `
+              <tr id="prop-${prop.id}">
+                <td>${prop.id}</td>
+                <td>${prop.title}</td>
+                <td>${prop.location}</td>
+                <td>${prop.ownerName}</td>
+                <td>$${prop.price}</td>
+                <td>${prop.haunting_level}</td>
+                <td style="color: ${prop.available ? '#51cf66' : '#ff6b6b'}">
+                  ${prop.available ? '✅ Available' : '❌ Unavailable'}
+                </td>
+                <td>
+                  <button class="action-btn verify-btn" onclick="viewAdminProperty(${prop.id})">
+                    👁️ View
+                  </button>
+                  <button class="action-btn reject-btn" onclick="deleteAdminProperty(${prop.id})">
+                    🗑️ Delete
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else {
+      container.innerHTML = '<div class="no-data">👻 No properties found</div>';
+    }
+  } catch (error) {
+    console.error('Error loading properties:', error);
+    document.getElementById('properties-container').innerHTML = 
+      '<div class="no-data">⚰️ Failed to load properties</div>';
+  }
+}
+
+// View property details (Admin)
+function viewAdminProperty(propertyId) {
+  window.location.href = `property-detail.html?id=${propertyId}`;
+}
+
+// Delete property (Admin)
+async function deleteAdminProperty(propertyId) {
+  if (!confirm('Delete this property? This action cannot be undone and will affect active bookings!')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/admin/properties/${propertyId}`, {
+      method: 'DELETE'
+    });
+    
+    const data = await response.json();
+    alert(data.message);
+    
+    if (data.success) {
+      document.getElementById(`prop-${propertyId}`).remove();
+      loadStats();
+    }
+  } catch (error) {
+    console.error('Error deleting property:', error);
+    alert('⚰️ Failed to delete property');
+  }
+}
+
+// Load all bookings (Admin)
+    async function loadAllBookings() {
+      try {
+        const response = await fetch('/api/admin/bookings');
+        const data = await response.json();
+        
+        const container = document.getElementById('bookings-container');
+        
+        if (data.success && data.bookings.length > 0) {
+          container.innerHTML = `
+            <table class="pending-hosts-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>User</th>
+                  <th>Property</th>
+                  <th>Check-In</th>
+                  <th>Check-Out</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.bookings.map(booking => `
+                  <tr>
+                    <td>${booking.id}</td>
+                    <td>${booking.userName}<br><small style="color:#888">${booking.userEmail}</small></td>
+                    <td>${booking.propertyTitle}<br><small style="color:#888">${booking.propertyLocation}</small></td>
+                    <td>${new Date(booking.checkIn).toLocaleDateString()}</td>
+                    <td>${new Date(booking.checkOut).toLocaleDateString()}</td>
+                    <td>$${booking.totalPrice}</td>
+                    <td style="color: ${booking.status === 'confirmed' ? '#51cf66' : booking.status === 'rejected' ? '#ff6b6b' : '#ffc107'}">
+                      ${booking.status.toUpperCase()}
+                    </td>
+                    <td>${new Date(booking.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        } else {
+          container.innerHTML = '<div class="no-data">👻 No bookings found</div>';
+        }
+      } catch (error) {
+        console.error('Error loading bookings:', error);
+        document.getElementById('bookings-container').innerHTML = 
+          '<div class="no-data">⚰️ Failed to load bookings</div>';
       }
     }
 

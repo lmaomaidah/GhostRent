@@ -3,16 +3,48 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const multer = require('multer');
 
 const app = express();
 const PORT = 3000;
 const JWT_SECRET = 'your-secret-haunted-key-change-this-in-production';
 
-// Middleware
+// ====================================
+// MULTER CONFIGURATION FOR FILE UPLOADS
+// ====================================
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/properties/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `property-${Date.now()}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files allowed! 👻'), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: fileFilter
+});
+
+// ====================================
+// MIDDLEWARE
+// ====================================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(__dirname)); // Serve static files (HTML, CSS, images)
+app.use(express.static(__dirname));
+app.use('/uploads', express.static('uploads'));
 
 // ====================================
 // IN-MEMORY DATABASES
@@ -20,22 +52,21 @@ app.use(express.static(__dirname)); // Serve static files (HTML, CSS, images)
 const defaultAdminPassword = bcrypt.hashSync('admin123', 10);
 
 const users = [
-  // Default admin account for testing
   {
     id: 1,
     firstName: 'Admin',
     lastName: 'Spirit',
     email: 'admin@ghostrent.com',
-    password: defaultAdminPassword, // now matches "admin123"
+    password: defaultAdminPassword,
     role: 'admin',
     verified: true,
     createdAt: new Date().toISOString()
   }
 ];
 
-const hosts = []; // Store host verification requests
-const properties = []; // Store property listings
-const bookings = []; // Store user bookings
+const hosts = [];
+const properties = [];
+const bookings = [];
 
 // ====================================
 // HELPER FUNCTIONS
@@ -81,7 +112,6 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
-// Role-based middleware
 const requireRole = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
@@ -101,7 +131,6 @@ app.post('/api/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, role } = req.body;
 
-    // Validation
     if (!firstName || !lastName || !email || !password || !role) {
       return res.status(400).json({
         success: false,
@@ -109,7 +138,6 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -118,7 +146,6 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
-    // Password strength check
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -126,7 +153,6 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
-    // Role validation
     if (!['user', 'lister'].includes(role)) {
       return res.status(400).json({
         success: false,
@@ -134,7 +160,6 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
-    // Check if user already exists
     const existingUser = findUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({
@@ -143,11 +168,9 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
-    // Hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create new user
     const newUser = {
       id: generateId(users),
       firstName,
@@ -155,13 +178,12 @@ app.post('/api/register', async (req, res) => {
       email: email.toLowerCase(),
       password: hashedPassword,
       role,
-      verified: role === 'user' ? true : false, // Users auto-verified, listers need approval
+      verified: role === 'user' ? true : false,
       createdAt: new Date().toISOString()
     };
 
     users.push(newUser);
 
-    // If registering as lister, create pending host entry
     if (role === 'lister') {
       hosts.push({
         id: generateId(hosts),
@@ -195,7 +217,6 @@ app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -203,7 +224,6 @@ app.post('/api/login', async (req, res) => {
       });
     }
 
-    // Find user
     const user = findUserByEmail(email);
     if (!user) {
       return res.status(401).json({
@@ -212,7 +232,6 @@ app.post('/api/login', async (req, res) => {
       });
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -221,7 +240,6 @@ app.post('/api/login', async (req, res) => {
       });
     }
 
-    // Create JWT token
     const token = jwt.sign(
       { 
         userId: user.id, 
@@ -234,11 +252,10 @@ app.post('/api/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
-    // Set HTTP-only cookie
     res.cookie('ghostToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000,
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
     });
 
@@ -290,7 +307,6 @@ app.get('/api/dashboard', authenticateToken, (req, res) => {
     });
   }
 
-  // Base user data
   const dashboardData = {
     success: true,
     user: {
@@ -304,7 +320,6 @@ app.get('/api/dashboard', authenticateToken, (req, res) => {
     }
   };
 
-  // Add role-specific data
   switch (user.role) {
     case 'admin':
       dashboardData.stats = {
@@ -330,8 +345,8 @@ app.get('/api/dashboard', authenticateToken, (req, res) => {
     case 'user':
       dashboardData.userActivity = {
         bookings: bookings.filter(b => b.userId === user.id),
-        savedProperties: [], // Can be implemented later
-        recentlyViewed: [] // Can be implemented later
+        savedProperties: [],
+        recentlyViewed: []
       };
       break;
   }
@@ -342,8 +357,6 @@ app.get('/api/dashboard', authenticateToken, (req, res) => {
 // ====================================
 // US-4: ADMIN HOST VERIFICATION
 // ====================================
-
-// Get all pending hosts (Admin only)
 app.get('/api/admin/pending-hosts', authenticateToken, requireRole('admin'), (req, res) => {
   const pendingHosts = hosts
     .filter(host => !host.verified)
@@ -365,7 +378,6 @@ app.get('/api/admin/pending-hosts', authenticateToken, requireRole('admin'), (re
   });
 });
 
-// Verify a host (Admin only)
 app.post('/api/admin/verify-host/:userId', authenticateToken, requireRole('admin'), (req, res) => {
   const userId = parseInt(req.params.userId);
   
@@ -392,7 +404,6 @@ app.post('/api/admin/verify-host/:userId', authenticateToken, requireRole('admin
     });
   }
 
-  // Verify the host
   host.verified = true;
   user.verified = true;
 
@@ -404,7 +415,6 @@ app.post('/api/admin/verify-host/:userId', authenticateToken, requireRole('admin
   });
 });
 
-// Reject a host (Admin only)
 app.post('/api/admin/reject-host/:userId', authenticateToken, requireRole('admin'), (req, res) => {
   const userId = parseInt(req.params.userId);
   
@@ -426,7 +436,6 @@ app.post('/api/admin/reject-host/:userId', authenticateToken, requireRole('admin
 
   const user = users[userIndex];
   
-  // Remove host and user
   hosts.splice(hostIndex, 1);
   users.splice(userIndex, 1);
 
@@ -438,7 +447,6 @@ app.post('/api/admin/reject-host/:userId', authenticateToken, requireRole('admin
   });
 });
 
-// Get all users (Admin only)
 app.get('/api/admin/users', authenticateToken, requireRole('admin'), (req, res) => {
   const allUsers = users.map(user => ({
     id: user.id,
@@ -459,12 +467,10 @@ app.get('/api/admin/users', authenticateToken, requireRole('admin'), (req, res) 
 // ====================================
 // PROPERTY MANAGEMENT (For Listers)
 // ====================================
-
-// Get lister's properties
 app.get('/api/lister/properties', authenticateToken, requireRole('lister'), (req, res) => {
   const host = findHostByUserId(req.user.userId);
   
-  if (!host.verified) {
+  if (!host || !host.verified) {
     return res.status(403).json({
       success: false,
       message: '⏳ Your host account is pending verification. Please wait for admin approval.'
@@ -479,11 +485,10 @@ app.get('/api/lister/properties', authenticateToken, requireRole('lister'), (req
   });
 });
 
-// Add new property
 app.post('/api/lister/properties', authenticateToken, requireRole('lister'), (req, res) => {
   const host = findHostByUserId(req.user.userId);
   
-  if (!host.verified) {
+  if (!host || !host.verified) {
     return res.status(403).json({
       success: false,
       message: '⏳ Your host account is pending verification. Please wait for admin approval.'
@@ -524,10 +529,151 @@ app.post('/api/lister/properties', authenticateToken, requireRole('lister'), (re
 });
 
 // ====================================
+// US-6: PROPERTY IMAGE UPLOAD
+// ====================================
+app.post('/api/lister/properties/:propertyId/images', 
+  authenticateToken, 
+  requireRole('lister'), 
+  upload.single('image'),
+  (req, res) => {
+    const propertyId = parseInt(req.params.propertyId);
+    const property = properties.find(p => p.id === propertyId);
+    
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: '👻 Property not found!'
+      });
+    }
+    
+    if (property.ownerId !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: '🚫 You can only upload images to your own properties!'
+      });
+    }
+    
+    const imagePath = `/uploads/properties/${req.file.filename}`;
+    property.image = imagePath;
+    
+    res.status(200).json({
+      success: true,
+      message: '📸 Haunted image uploaded successfully!',
+      imagePath
+    });
+  }
+);
+
+// ====================================
+// US-7: EDIT PROPERTY
+// ====================================
+app.put('/api/lister/properties/:propertyId', 
+  authenticateToken, 
+  requireRole('lister'),
+  (req, res) => {
+    const propertyId = parseInt(req.params.propertyId);
+    const property = properties.find(p => p.id === propertyId);
+    
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: '👻 Property not found!'
+      });
+    }
+    
+    if (property.ownerId !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: '🚫 You can only edit your own properties!'
+      });
+    }
+    
+    const { title, description, location, price, haunting_level, available } = req.body;
+    
+    if (title) property.title = title;
+    if (description) property.description = description;
+    if (location) property.location = location;
+    if (price) property.price = parseFloat(price);
+    if (haunting_level) property.haunting_level = haunting_level;
+    if (typeof available !== 'undefined') property.available = available;
+    
+    property.updatedAt = new Date().toISOString();
+    
+    console.log(`✏️ Property updated: ${property.title}`);
+    
+    res.status(200).json({
+      success: true,
+      message: '✅ Property updated successfully!',
+      property
+    });
+  }
+);
+
+// ====================================
+// US-8: DELETE PROPERTY
+// ====================================
+app.delete('/api/lister/properties/:propertyId', 
+  authenticateToken, 
+  requireRole('lister'),
+  (req, res) => {
+    const propertyId = parseInt(req.params.propertyId);
+    const propertyIndex = properties.findIndex(p => p.id === propertyId);
+    
+    if (propertyIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: '👻 Property not found!'
+      });
+    }
+    
+    const property = properties[propertyIndex];
+    
+    if (property.ownerId !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: '🚫 You can only delete your own properties!'
+      });
+    }
+    
+    properties.splice(propertyIndex, 1);
+    
+    console.log(`🗑️ Property deleted: ${property.title}`);
+    
+    res.status(200).json({
+      success: true,
+      message: '🗑️ Property deleted successfully!'
+    });
+  }
+);
+
+// ====================================
+// US-10: GET SINGLE PROPERTY DETAILS
+// ====================================
+app.get('/api/properties/:propertyId', authenticateToken, (req, res) => {
+  const propertyId = parseInt(req.params.propertyId);
+  const property = properties.find(p => p.id === propertyId);
+  
+  if (!property) {
+    return res.status(404).json({
+      success: false,
+      message: '👻 Property not found!'
+    });
+  }
+  
+  const owner = findUserById(property.ownerId);
+  
+  res.status(200).json({
+    success: true,
+    property: {
+      ...property,
+      ownerName: `${owner.firstName} ${owner.lastName}`
+    }
+  });
+});
+
+// ====================================
 // BOOKING MANAGEMENT (For Users)
 // ====================================
-
-// Get all available properties
 app.get('/api/properties', authenticateToken, (req, res) => {
   const availableProperties = properties
     .filter(p => p.available)
@@ -545,7 +691,6 @@ app.get('/api/properties', authenticateToken, (req, res) => {
   });
 });
 
-// Create booking
 app.post('/api/bookings', authenticateToken, requireRole('user'), (req, res) => {
   const { propertyId, checkIn, checkOut } = req.body;
 
@@ -593,7 +738,6 @@ app.post('/api/bookings', authenticateToken, requireRole('user'), (req, res) => 
   });
 });
 
-// Get user bookings
 app.get('/api/bookings', authenticateToken, requireRole('user'), (req, res) => {
   const userBookings = bookings
     .filter(b => b.userId === req.user.userId)
@@ -613,10 +757,189 @@ app.get('/api/bookings', authenticateToken, requireRole('user'), (req, res) => {
 });
 
 // ====================================
+// US-18: UPDATE BOOKING STATUS
+// ====================================
+app.patch('/api/bookings/:bookingId/status', 
+  authenticateToken, 
+  (req, res) => {
+    const bookingId = parseInt(req.params.bookingId);
+    const { status } = req.body;
+    
+    const booking = bookings.find(b => b.id === bookingId);
+    
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: '👻 Booking not found!'
+      });
+    }
+    
+    const validStatuses = ['pending', 'confirmed', 'rejected', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: '❌ Invalid status!'
+      });
+    }
+    
+    booking.status = status;
+    booking.updatedAt = new Date().toISOString();
+    
+    res.status(200).json({
+      success: true,
+      message: `✅ Booking status updated to ${status}`,
+      booking
+    });
+  }
+);
+
+// ====================================
+// US-19: CANCEL BOOKING
+// ====================================
+app.delete('/api/bookings/:bookingId', 
+  authenticateToken, 
+  requireRole('user'),
+  (req, res) => {
+    const bookingId = parseInt(req.params.bookingId);
+    const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+    
+    if (bookingIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: '👻 Booking not found!'
+      });
+    }
+    
+    const booking = bookings[bookingIndex];
+    
+    if (booking.userId !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: '🚫 You can only cancel your own bookings!'
+      });
+    }
+    
+    bookings.splice(bookingIndex, 1);
+    
+    res.status(200).json({
+      success: true,
+      message: '❌ Booking cancelled successfully!'
+    });
+  }
+);
+
+// ====================================
+// ADMIN PROPERTY MANAGEMENT (US-20 to US-22)
+// ====================================
+app.get('/api/admin/properties', 
+  authenticateToken, 
+  requireRole('admin'),
+  (req, res) => {
+    const allProperties = properties.map(p => {
+      const owner = findUserById(p.ownerId);
+      return {
+        ...p,
+        ownerName: `${owner.firstName} ${owner.lastName}`
+      };
+    });
+    
+    res.status(200).json({
+      success: true,
+      properties: allProperties
+    });
+  }
+);
+
+app.put('/api/admin/properties/:propertyId', 
+  authenticateToken, 
+  requireRole('admin'),
+  (req, res) => {
+    const propertyId = parseInt(req.params.propertyId);
+    const property = properties.find(p => p.id === propertyId);
+    
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: '👻 Property not found!'
+      });
+    }
+    
+    const { title, description, location, price, haunting_level, available } = req.body;
+    
+    if (title) property.title = title;
+    if (description) property.description = description;
+    if (location) property.location = location;
+    if (price) property.price = parseFloat(price);
+    if (haunting_level) property.haunting_level = haunting_level;
+    if (typeof available !== 'undefined') property.available = available;
+    
+    property.updatedAt = new Date().toISOString();
+    
+    console.log(`✏️ Admin edited property: ${property.title}`);
+    
+    res.status(200).json({
+      success: true,
+      message: '✅ Property updated by admin!',
+      property
+    });
+  }
+);
+
+app.delete('/api/admin/properties/:propertyId', 
+  authenticateToken, 
+  requireRole('admin'),
+  (req, res) => {
+    const propertyId = parseInt(req.params.propertyId);
+    const propertyIndex = properties.findIndex(p => p.id === propertyId);
+    
+    if (propertyIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: '👻 Property not found!'
+      });
+    }
+    
+    const property = properties[propertyIndex];
+    properties.splice(propertyIndex, 1);
+    
+    console.log(`🗑️ Admin deleted property: ${property.title}`);
+    
+    res.status(200).json({
+      success: true,
+      message: '🗑️ Property deleted by admin!'
+    });
+  }
+);
+
+// ====================================
+// US-24: ADMIN BOOKING OVERSIGHT
+// ====================================
+app.get('/api/admin/bookings', 
+  authenticateToken, 
+  requireRole('admin'),
+  (req, res) => {
+    const allBookings = bookings.map(b => {
+      const user = findUserById(b.userId);
+      const property = properties.find(p => p.id === b.propertyId);
+      return {
+        ...b,
+        userName: `${user.firstName} ${user.lastName}`,
+        userEmail: user.email,
+        propertyTitle: property ? property.title : 'Unknown',
+        propertyLocation: property ? property.location : 'Unknown'
+      };
+    });
+    
+    res.status(200).json({
+      success: true,
+      bookings: allBookings
+    });
+  }
+);
+
+// ====================================
 // UTILITY ENDPOINTS
 // ====================================
-
-// Check authentication status
 app.get('/api/auth/status', authenticateToken, (req, res) => {
   const user = findUserById(req.user.userId);
   
@@ -634,7 +957,6 @@ app.get('/api/auth/status', authenticateToken, (req, res) => {
   });
 });
 
-// Get stats (for debugging)
 app.get('/api/stats', authenticateToken, requireRole('admin'), (req, res) => {
   res.status(200).json({
     success: true,
