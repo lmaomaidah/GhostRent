@@ -600,33 +600,45 @@
       
       document.getElementById('bookingForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const bookingData = {
-          propertyId: property.id,
-          checkIn: checkInInput.value,
-          checkOut: checkOutInput.value
-        };
-        
-        try {
-          const res = await fetch('/api/bookings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin',
-            body: JSON.stringify(bookingData)
-          });
-          
-          const data = await res.json();
-          
-          if (data.success) {
-            alert('🎃 ' + data.message);
-            window.location.href = 'dashboard-user.html';
-          } else {
-            alert('⚰️ ' + data.message);
-          }
-        } catch (error) {
-          console.error('Booking error:', error);
-          alert('⚰️ Failed to create booking');
+
+        // Compute nights and totals
+        const checkInVal = checkInInput.value;
+        const checkOutVal = checkOutInput.value;
+        if (!checkInVal || !checkOutVal) {
+          alert('⚠️ Please select check-in and check-out dates.');
+          return;
         }
+
+        const checkInDate = new Date(checkInVal);
+        const checkOutDate = new Date(checkOutVal);
+
+        if (checkOutDate <= checkInDate) {
+          alert('⚠️ Check-out must be after check-in.');
+          return;
+        }
+
+        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+        const subtotal = nights * (property.price || 0);
+        const tax = Math.round(subtotal * 0.05 * 100) / 100; // 5% tax
+        const total = Math.round((subtotal + tax) * 100) / 100;
+
+        const bookingForPayment = {
+          propertyId: property.id,
+          propertyTitle: property.title,
+          checkin: checkInVal,
+          checkout: checkOutVal,
+          nights,
+          subtotal,
+          tax,
+          total,
+          roomType: 'Standard' // update if you add selectable room types
+        };
+
+        // Save booking info for payment page
+        localStorage.setItem('ghostrent_booking', JSON.stringify(bookingForPayment));
+
+        // Redirect to payment page which will complete payment and create the booking
+        window.location.href = 'booking.html';
       });
     }
 
