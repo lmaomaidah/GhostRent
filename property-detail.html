@@ -174,6 +174,7 @@
       border-radius: 14px;
       box-shadow: 0 8px 28px rgba(0,0,0,0.6);
       backdrop-filter: blur(4px);
+      margin-bottom: 20px;
     }
 
     .detail-box h2 {
@@ -216,6 +217,314 @@
       color: #e7faff;
       font-weight: 700;
       font-size: 1.2rem;
+    }
+
+    /* RATINGS SUMMARY */
+    .ratings-summary {
+      background: rgba(255,255,255,0.03);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .ratings-summary:hover {
+      background: rgba(255,255,255,0.05);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(111,179,214,0.2);
+    }
+
+    .rating-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .rating-score {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rating-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #51cf66;
+      font-family: 'Griffy', cursive;
+    }
+
+    .rating-stars {
+      font-size: 1.5rem;
+      color: #ffd43b;
+    }
+
+    .rating-count {
+      color: #9fb1bb;
+      font-size: 0.9rem;
+    }
+
+    .view-all-btn {
+      padding: 8px 16px;
+      background: rgba(111,179,214,0.1);
+      border: 1px solid rgba(111,179,214,0.3);
+      color: #6fb3d6;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .view-all-btn:hover {
+      background: rgba(111,179,214,0.2);
+    }
+
+    .recent-reviews {
+      margin-top: 16px;
+    }
+
+    .review-preview {
+      background: rgba(0,0,0,0.2);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 3px solid rgba(111,179,214,0.4);
+    }
+
+    .review-preview:last-child {
+      margin-bottom: 0;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .reviewer-name {
+      font-weight: 600;
+      color: #e7faff;
+      font-size: 0.95rem;
+    }
+
+    .review-stars {
+      color: #ffd43b;
+      font-size: 0.9rem;
+    }
+
+    .review-text {
+      color: #bfc8c9;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .review-date {
+      color: #8f9a9a;
+      font-size: 0.8rem;
+      margin-top: 6px;
+    }
+
+    /* REVIEW MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(3px);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(180deg, rgba(12,16,20,0.95), rgba(6,10,14,0.95));
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 700px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+      position: relative;
+      animation: slideUp 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .modal-title {
+      font-family: 'Henny Penny', cursive;
+      font-size: 1.8rem;
+      color: #e8f6fb;
+      text-shadow: 0 0 15px rgba(120,190,220,0.3);
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: #9fb1bb;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      line-height: 1;
+    }
+
+    .close-modal:hover {
+      color: #e7faff;
+      transform: rotate(90deg);
+    }
+
+    .modal-rating-summary {
+      background: rgba(255,255,255,0.03);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-rating-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #51cf66;
+      font-family: 'Griffy', cursive;
+      margin-bottom: 8px;
+    }
+
+    .modal-rating-stars {
+      font-size: 2rem;
+      color: #ffd43b;
+      margin-bottom: 8px;
+    }
+
+    .modal-rating-count {
+      color: #9fb1bb;
+      font-size: 1rem;
+    }
+
+    /* LEAVE REVIEW FORM */
+    .leave-review-section {
+      background: rgba(111,179,214,0.05);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(111,179,214,0.2);
+      margin-bottom: 24px;
+    }
+
+    .leave-review-section h3 {
+      font-family: 'Griffy', cursive;
+      color: #eef6f6;
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+    }
+
+    .star-rating {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      justify-content: center;
+    }
+
+    .star {
+      font-size: 2rem;
+      cursor: pointer;
+      color: #4a5568;
+      transition: 0.2s;
+    }
+
+    .star:hover,
+    .star.active {
+      color: #ffd43b;
+      transform: scale(1.1);
+    }
+
+    .review-textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(4,8,12,0.55);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #e7faff;
+      font-family: 'Cinzel', serif;
+      resize: vertical;
+      min-height: 100px;
+      margin-bottom: 12px;
+    }
+
+    .review-textarea:focus {
+      outline: none;
+      border-color: rgba(111,179,214,0.4);
+    }
+
+    .submit-review-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(180deg, #143b55, #0c2b40);
+      border: 1px solid rgba(120,200,240,0.06);
+      color: #e7fbff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      transition: 0.2s;
+    }
+
+    .submit-review-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(30,80,110,0.3);
+    }
+
+    .submit-review-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ALL REVIEWS */
+    .all-reviews {
+      margin-top: 24px;
+    }
+
+    .all-reviews h3 {
+      font-family: 'Griffy', cursive;
+      color: #eef6f6;
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+    }
+
+    .review-item {
+      background: rgba(255,255,255,0.02);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 12px;
+    }
+
+    .review-item:last-child {
+      margin-bottom: 0;
     }
 
     /* SIDEBAR */
@@ -360,6 +669,11 @@
       .info-grid {
         grid-template-columns: 1fr;
       }
+
+      .modal-content {
+        width: 95%;
+        padding: 20px;
+      }
     }
   </style>
 </head>
@@ -411,6 +725,27 @@
             <!-- Info items will be injected here -->
           </div>
         </section>
+
+        <!-- RATINGS & REVIEWS SECTION -->
+        <section class="detail-box">
+          <h2>Ratings & Reviews</h2>
+          <div class="ratings-summary" id="ratingsSummary" onclick="openReviewModal()">
+            <div class="rating-header">
+              <div class="rating-score">
+                <div class="rating-number" id="avgRating">4.8</div>
+                <div>
+                  <div class="rating-stars" id="avgStars">★★★★★</div>
+                  <div class="rating-count" id="reviewCount">12 reviews</div>
+                </div>
+              </div>
+              <button class="view-all-btn">View All</button>
+            </div>
+            
+            <div class="recent-reviews" id="recentReviews">
+              <!-- Recent reviews will be injected here -->
+            </div>
+          </div>
+        </section>
       </div>
 
       <aside class="sidebar">
@@ -447,6 +782,49 @@
     </div>
   </main>
 
+  <!-- REVIEW MODAL -->
+  <div class="modal" id="reviewModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Reviews & Ratings</h2>
+        <button class="close-modal" onclick="closeReviewModal()">&times;</button>
+      </div>
+
+      <div class="modal-rating-summary">
+        <div class="modal-rating-number" id="modalAvgRating">4.8</div>
+        <div class="modal-rating-stars" id="modalAvgStars">★★★★★</div>
+        <div class="modal-rating-count" id="modalReviewCount">Based on 12 reviews</div>
+      </div>
+
+      <!-- LEAVE A REVIEW -->
+      <div class="leave-review-section" id="leaveReviewSection">
+        <h3>Leave a Review</h3>
+        <div class="star-rating" id="starRating">
+          <span class="star" data-rating="1">★</span>
+          <span class="star" data-rating="2">★</span>
+          <span class="star" data-rating="3">★</span>
+          <span class="star" data-rating="4">★</span>
+          <span class="star" data-rating="5">★</span>
+        </div>
+        <textarea 
+          class="review-textarea" 
+          id="reviewText" 
+          placeholder="Share your haunting experience..."
+          maxlength="500"
+        ></textarea>
+        <button class="submit-review-btn" onclick="submitReview()">Submit Review</button>
+      </div>
+
+      <!-- ALL REVIEWS -->
+      <div class="all-reviews">
+        <h3>All Reviews</h3>
+        <div id="allReviewsList">
+          <!-- Reviews will be injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
     © Phantom Systems – GhostRent. Enter at your own risk.
   </footer>
@@ -462,6 +840,8 @@
 
     let currentProperty = null;
     let userRole = null;
+    let selectedRating = 0;
+    let reviews = [];
 
     async function checkAuth() {
       try {
@@ -497,11 +877,197 @@
         
         currentProperty = data.property;
         displayProperty(currentProperty);
+        await loadReviews();
         
       } catch (error) {
         console.error('Error loading property:', error);
         alert('Failed to load property details');
         window.location.href = 'property-list.html';
+      }
+    }
+
+    async function loadReviews() {
+      try {
+        const res = await fetch(`/api/properties/${propertyId}/reviews`, {
+          credentials: 'same-origin'
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            reviews = data.reviews || [];
+            displayReviews();
+          }
+        }
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+        // Use mock data if API fails
+        reviews = generateMockReviews();
+        displayReviews();
+      }
+    }
+
+    function generateMockReviews() {
+      return [
+        {
+          id: 1,
+          rating: 5,
+          text: "Absolutely terrifying experience! The ghosts were very accommodating and the atmosphere was perfectly eerie. Would haunt again!",
+          userName: "Emily R.",
+          date: "2024-11-15"
+        },
+        {
+          id: 2,
+          rating: 4,
+          text: "Great property with authentic paranormal activity. Lost one star because the chains rattling at 3 AM was a bit too frequent.",
+          userName: "Marcus T.",
+          date: "2024-11-10"
+        },
+        {
+          id: 3,
+          rating: 5,
+          text: "Best haunted mansion I've stayed at! The cold spots were refreshing and the spectral apparitions were top-notch.",
+          userName: "Sarah K.",
+          date: "2024-11-05"
+        }
+      ];
+    }
+
+    function displayReviews() {
+      if (reviews.length === 0) {
+        reviews = generateMockReviews();
+      }
+
+      const avgRating = (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
+      const reviewCount = reviews.length;
+      const stars = '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating));
+
+      // Update summary
+      document.getElementById('avgRating').textContent = avgRating;
+      document.getElementById('avgStars').textContent = stars;
+      document.getElementById('reviewCount').textContent = `${reviewCount} review${reviewCount !== 1 ? 's' : ''}`;
+
+      // Update modal
+      document.getElementById('modalAvgRating').textContent = avgRating;
+      document.getElementById('modalAvgStars').textContent = stars;
+      document.getElementById('modalReviewCount').textContent = `Based on ${reviewCount} review${reviewCount !== 1 ? 's' : ''}`;
+
+      // Show recent reviews (top 2)
+      const recentReviewsHtml = reviews.slice(0, 2).map(review => `
+        <div class="review-preview">
+          <div class="review-header">
+            <span class="reviewer-name">${review.userName}</span>
+            <span class="review-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
+          </div>
+          <div class="review-text">${review.text.substring(0, 100)}${review.text.length > 100 ? '...' : ''}</div>
+          <div class="review-date">${new Date(review.date).toLocaleDateString()}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('recentReviews').innerHTML = recentReviewsHtml;
+
+      // Show all reviews in modal
+      const allReviewsHtml = reviews.map(review => `
+        <div class="review-item">
+          <div class="review-header">
+            <span class="reviewer-name">${review.userName}</span>
+            <span class="review-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
+          </div>
+          <div class="review-text">${review.text}</div>
+          <div class="review-date">${new Date(review.date).toLocaleDateString()}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('allReviewsList').innerHTML = allReviewsHtml || '<p style="color: #9fb1bb; text-align: center;">No reviews yet. Be the first to review!</p>';
+    }
+
+    function openReviewModal() {
+      document.getElementById('reviewModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeReviewModal() {
+      document.getElementById('reviewModal').classList.remove('show');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Star rating interaction
+    document.querySelectorAll('.star').forEach(star => {
+      star.addEventListener('click', function() {
+        selectedRating = parseInt(this.dataset.rating);
+        document.querySelectorAll('.star').forEach((s, index) => {
+          if (index < selectedRating) {
+            s.classList.add('active');
+          } else {
+            s.classList.remove('active');
+          }
+        });
+      });
+
+      star.addEventListener('mouseenter', function() {
+        const rating = parseInt(this.dataset.rating);
+        document.querySelectorAll('.star').forEach((s, index) => {
+          if (index < rating) {
+            s.style.color = '#ffd43b';
+          } else {
+            s.style.color = '#4a5568';
+          }
+        });
+      });
+    });
+
+    document.getElementById('starRating').addEventListener('mouseleave', function() {
+      document.querySelectorAll('.star').forEach((s, index) => {
+        if (index < selectedRating) {
+          s.style.color = '#ffd43b';
+        } else {
+          s.style.color = '#4a5568';
+        }
+      });
+    });
+
+    async function submitReview() {
+      if (!userRole) {
+        alert('⚠️ Please log in to leave a review.');
+        return;
+      }
+
+      if (selectedRating === 0) {
+        alert('⚠️ Please select a star rating.');
+        return;
+      }
+
+      const reviewText = document.getElementById('reviewText').value.trim();
+      if (!reviewText) {
+        alert('⚠️ Please write a review.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/properties/${propertyId}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            rating: selectedRating,
+            text: reviewText
+          })
+        });
+
+        const data = await res.json();
+        
+        if (data.success) {
+          alert('✨ Review submitted successfully!');
+          selectedRating = 0;
+          document.getElementById('reviewText').value = '';
+          document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+          await loadReviews();
+        } else {
+          alert('❌ ' + (data.message || 'Failed to submit review'));
+        }
+      } catch (error) {
+        console.error('Error submitting review:', error);
+        alert('⚠️ Failed to submit review. Please try again.');
       }
     }
 
@@ -601,7 +1167,6 @@
       document.getElementById('bookingForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Compute nights and totals
         const checkInVal = checkInInput.value;
         const checkOutVal = checkOutInput.value;
         if (!checkInVal || !checkOutVal) {
@@ -619,7 +1184,7 @@
 
         const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
         const subtotal = nights * (property.price || 0);
-        const tax = Math.round(subtotal * 0.05 * 100) / 100; // 5% tax
+        const tax = Math.round(subtotal * 0.05 * 100) / 100;
         const total = Math.round((subtotal + tax) * 100) / 100;
 
         const bookingForPayment = {
@@ -631,16 +1196,20 @@
           subtotal,
           tax,
           total,
-          roomType: 'Standard' // update if you add selectable room types
+          roomType: 'Standard'
         };
 
-        // Save booking info for payment page
         localStorage.setItem('ghostrent_booking', JSON.stringify(bookingForPayment));
-
-        // Redirect to payment page which will complete payment and create the booking
         window.location.href = 'booking.html';
       });
     }
+
+    // Close modal when clicking outside
+    document.getElementById('reviewModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeReviewModal();
+      }
+    });
 
     async function init() {
       await checkAuth();

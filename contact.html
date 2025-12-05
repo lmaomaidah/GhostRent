@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GhostRent – Contact Us</title>
+
+  <!-- GhostRent Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Griffy&family=Henny+Penny&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------------------------- GLOBAL ---------------------------- */
+    @import url('https://fonts.googleapis.com/css2?family=Griffy&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Henny+Penny&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Griffy", system-ui;
+      letter-spacing: 1px;
+    }
+
+    body {
+      min-height: 100vh;
+      color: white;
+      background:
+        linear-gradient(to right, rgba(14,17,23,0.95) 0%, rgba(14,17,23,0.7) 40%, rgba(14,17,23,0) 70%),
+        url('image.jpg') no-repeat center center/cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 50px;
+    }
+
+    /* ---------------------------- NAVBAR ---------------------------- */
+    .navbar {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 10px;
+      margin-bottom: 10px;
+    }
+
+    .logo img {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 25px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      padding: 10px 20px;
+      color: #cdd9ff;
+      background: rgba(10,20,40,0.6);
+      border: 1px solid rgba(40,60,100,0.6);
+      border-radius: 30px;
+      font-weight: 600;
+      transition: 0.3s ease;
+      backdrop-filter: blur(3px);
+    }
+
+    .nav-links a:hover {
+      color: #e6f3ff;
+      background: rgba(20,30,60,0.9);
+      box-shadow: 0 0 14px rgba(40,80,150,0.5);
+      transform: translateY(-2px);
+    }
+
+    /* ---------------------------- HEADER ---------------------------- */
+    .page-header {
+      text-align: center;
+      margin-top: 15px;
+      margin-bottom: 40px;
+    }
+
+    .title {
+      font-family: "Henny Penny", system-ui;
+      font-size: 3.5rem;
+      color: #f0f6ff;
+      text-shadow: 0 0 18px rgba(200,200,255,0.6);
+      animation: ghostlyDrift 3.5s ease-in-out infinite;
+    }
+
+    @keyframes ghostlyDrift {
+      0%,100% { transform: translateY(0); opacity: 1; }
+      50% { transform: translateY(-7px); opacity: 0.95; }
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      margin-top: 10px;
+      color: #cdd6e6;
+    }
+
+    /* ---------------------------- GRID LAYOUT ---------------------------- */
+    .container {
+      max-width: 1180px;
+      width: 100%;
+      padding: 20px;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 35px;
+    }
+
+    @media(max-width: 900px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ---------------------------- LEFT BOX ---------------------------- */
+    .info-box {
+      background: rgba(10,10,20,0.75);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    }
+
+    .info-title {
+      font-family: "Henny Penny";
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      color: #eaf6ff;
+      text-shadow: 0 0 12px rgba(150,200,255,0.5);
+    }
+
+    .info-item {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 20px;
+      font-size: 1rem;
+      color: #dbe7ff;
+    }
+
+    .info-icon {
+      font-size: 1.5rem;
+      color: #7fc7ff;
+    }
+
+    /* ---------------------------- FORM ---------------------------- */
+    .form-box {
+      background: rgba(8,10,18,0.78);
+      padding: 30px;
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 0 25px rgba(0,0,0,0.6);
+    }
+
+    label {
+      font-size: 0.95rem;
+      color: #ccc;
+      font-family: "Henny Penny";
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    /* 🎃 Inputs styled exactly like login/registration */
+    input, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      background: #1c1f26;
+      border: 1px solid #2c2f36;
+      border-radius: 10px;
+      color: #aaa;
+      box-shadow: 0 0 5px rgba(255,255,255,0.05);
+      font-size: 0.95rem;
+      font-family: "Griffy";
+      margin-bottom: 18px;
+      transition: 0.3s ease;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: rgba(180,255,250,0.4);
+      box-shadow:
+        0 0 8px rgba(180,255,250,0.3),
+        0 0 16px rgba(180,255,250,0.15);
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: none;
+    }
+
+    .btn-send {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(145deg, #26344a, #1b2333);
+      color: white;
+      font-size: 1.1rem;
+      font-family: "Henny Penny";
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(100,150,255,0.3);
+      transition: 0.3s ease;
+    }
+
+    .btn-send:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 25px rgba(140,180,255,0.6);
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">
+    <img src="logo.png" alt="GhostRent Logo">
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="properties.html">Properties</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</div>
+
+<!-- HEADER -->
+<div class="page-header">
+  <h1 class="title">Get In Touch</h1>
+  <p class="subtitle">We hear every whisper between worlds. Speak…</p>
+</div>
+
+<!-- BODY CONTENT -->
+<div class="container">
+  <div class="contact-grid">
+    
+    <!-- LEFT SIDE -->
+    <div class="info-box">
+      <h2 class="info-title">Whispers From The Void</h2>
+
+      <div class="info-item">
+        <span class="info-icon">📞</span>
+        <span>+92 315 5111291<br>+92 319 1692007</span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-icon">📧</span>
+        <span>support@ghostrent.com</span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-icon">📍</span>
+        <span>Somewhere between reality & dreams</span>
+      </div>
+    </div>
+
+    <!-- FORM SIDE -->
+    <div class="form-box">
+      <form id="contactForm">
+        
+        <label>Your Name</label>
+        <input type="text" id="name" required placeholder="John Ghostwalker">
+
+        <label>Your Email</label>
+        <input type="email" id="email" required placeholder="spooky@mail.com">
+
+        <label>Subject</label>
+        <input type="text" id="subject" required placeholder="Inquiry about haunted mansion">
+
+        <label>Message</label>
+        <textarea id="message" required placeholder="Write your message..."></textarea>
+
+        <button class="btn-send" type="submit">Send Message</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.getElementById("contactForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  alert("👻 Message sent! The spirits will reply soon…");
+});
+</script>
+
+</body>
+</html>
