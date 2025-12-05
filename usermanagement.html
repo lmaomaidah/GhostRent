@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GhostRent — User Management</title>
+
+  <!-- Fonts (same as your theme) -->
+  <link href="https://fonts.googleapis.com/css2?family=Griffy&family=Cinzel:wght@400;700&family=Henny+Penny&display=swap" rel="stylesheet">
+
+  <style>
+  /* ---------------------------
+     GhostRent - User Management
+     --------------------------- */
+  :root{
+    --bg-img: url('haunted-bg.jpg');
+    --overlay: rgba(10,20,30,0.55);
+    --panel: rgba(20,24,28,0.75);
+    --muted: #bfc8c9;
+    --accent: #92b6b6;
+    --ghost-blue: #a4c6ff;
+    --glass-border: rgba(255,255,255,0.03);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family: "Cinzel", serif;
+    background: var(--bg-img) no-repeat center center/cover;
+    background-attachment: fixed;
+    color:#e8e8e8;
+    min-height:100vh;
+    position:relative;
+  }
+  .overlay{
+    position:fixed;inset:0;background:var(--overlay);backdrop-filter: blur(1px) brightness(1.05);z-index:1;pointer-events:none;
+  }
+
+  /* page container */
+  .page {
+    position:relative;
+    z-index:2;
+    max-width:1200px;
+    margin: 28px auto;
+    padding: 26px;
+  }
+
+  /* navbar (keeps theme consistent) */
+  .navbar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:18px;
+    margin-bottom:18px;
+  }
+  .logo img{ width:72px; height:72px; border-radius:50%; object-fit:cover; background:rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.06) }
+  .nav-links { list-style:none; display:flex; gap:18px }
+  .nav-links a { color: #cdd9ff; text-decoration:none; font-family:"Griffy",cursive; letter-spacing:1px }
+  .nav-links a:hover{ color:var(--ghost-blue); text-shadow:0 0 8px rgba(160,200,255,0.25) }
+
+  /* header */
+  .header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  .header-left h1 {
+    font-family: "Henny Penny", system-ui;
+    font-size: 2.4rem;
+    color: #eef6f6;
+    text-shadow: 0 0 10px rgba(0,0,0,0.6);
+  }
+  .header-left p { color:var(--muted); margin-top:6px }
+
+  /* main panel */
+  .panel {
+    background: linear-gradient(180deg, rgba(12,16,20,0.6), rgba(6,10,14,0.55));
+    border-radius: 14px;
+    padding: 18px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  }
+
+  /* controls row */
+  .controls { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px }
+  .controls .left { display:flex; gap:10px; align-items:center }
+  .search {
+    background: rgba(255,255,255,0.02);
+    padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);
+  }
+  .search input{
+    background:transparent;border:0;color:var(--muted);outline:none;width:280px;font-size:0.95rem;
+  }
+  .btn {
+    padding:8px 14px;border-radius:10px;border:none;cursor:pointer;font-family:"Cinzel",serif;font-weight:600;
+    background: rgba(20,25,30,0.8); color:#e8e8e8; border:1px solid rgba(255,255,255,0.03)
+  }
+  .btn.ghost { background:transparent; border:1px solid rgba(255,255,255,0.04) }
+  .btn.primary { background: linear-gradient(180deg, rgba(70,110,160,0.14), rgba(30,70,100,0.12)); color:var(--ghost-blue); border:1px solid rgba(160,200,255,0.06) }
+
+  /* table */
+  .users-table { width:100%; border-collapse:collapse; margin-top:8px; font-size:0.95rem; }
+  .users-table thead th{
+    text-align:left;padding:14px;color:#cdd9ff;font-family:"Griffy",cursive;border-bottom:1px solid rgba(255,255,255,0.04)
+  }
+  .users-table tbody tr { transition: background .18s ease }
+  .users-table tbody tr:hover { background: rgba(255,255,255,0.02) }
+
+  .cell {
+    padding:14px; vertical-align:middle;
+  }
+
+  .user-identity {
+    display:flex; gap:12px; align-items:center;
+  }
+  .avatar {
+    width:44px;height:44px;border-radius:10px;background:#222;border:1px solid rgba(255,255,255,0.04); display:inline-block; object-fit:cover;
+  }
+  .user-meta small { display:block;color:var(--muted); font-size:0.85rem }
+
+  /* Haunted themed role badges (Option 2) */
+  .role-badge {
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:12px;
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:0.75rem;
+    letter-spacing:0.8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  }
+
+  /* badge styles */
+  .badge-admin {
+    background: linear-gradient(90deg,#3b2f4a,#34466a);
+    color:#199e97;
+    border: 1px solid rgba(255,120,120,0.08);
+    text-shadow: 0 0 8px rgba(255,180,180,0.06);
+  }
+
+  .badge-lister-pending {
+    background: linear-gradient(90deg,#403217,#6a4f25);
+    color:#ffe8b3;
+    border:1px solid rgba(255,200,120,0.08);
+    animation: flicker-gold 3s infinite;
+  }
+
+  .badge-lister-approved {
+    background: linear-gradient(90deg,#0b3b2f,#2e6b58);
+    color:#e6fff6;
+    border:1px solid rgba(120,255,220,0.06);
+    box-shadow: 0 0 12px rgba(80,200,170,0.08);
+  }
+
+  .badge-user {
+    background: linear-gradient(90deg,#1c2330,#2a3240);
+    color:#d7e6ef;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+
+  @keyframes flicker-gold {
+    0%, 80%, 100% { box-shadow: 0 8px 30px rgba(210,160,60,0.06) }
+    40% { box-shadow: 0 12px 40px rgba(255,200,50,0.14); transform:translateY(-2px) }
+  }
+
+  /* action buttons cell */
+  .actions { display:flex; gap:8px; align-items:center; justify-content:flex-end }
+  .action-small { padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); cursor:pointer }
+  .action-approve { background: linear-gradient(180deg,#314b33,#23422a); color:#dffbe9; border:1px solid rgba(80,220,140,0.08) }
+  .action-remove { background: linear-gradient(180deg,#4a3030,#3b2222); color:#ffdede; border:1px solid rgba(255,120,120,0.06) }
+
+  /* empty state */
+  .empty { padding:40px; text-align:center; color:var(--muted); font-style:italic }
+
+  /* modal */
+  .modal-backdrop {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:2000;
+  }
+  .modal {
+    width:92%; max-width:520px; background:linear-gradient(180deg, rgba(16,18,22,0.95), rgba(10,12,16,0.95));
+    border-radius:12px; padding:20px; border:1px solid rgba(255,255,255,0.04); box-shadow:0 18px 60px rgba(0,0,0,0.8);
+  }
+  .modal h3 { font-family:"Henny Penny",system-ui; margin-bottom:8px; color:#f1f1f1 }
+  .modal p { color:var(--muted); margin-bottom:16px; line-height:1.5 }
+
+  .modal .row { display:flex; gap:10px; justify-content:flex-end }
+  .modal .row .btn { min-width:96px }
+
+  /* responsive */
+  @media (max-width:900px){
+    .header-left h1 { font-size:1.6rem }
+    .search input{ width:160px }
+    .users-table thead th:nth-child(3), .users-table td:nth-child(3) { display:none } /* hide email on tiny screens */
+  }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <div class="page">
+    <!-- NAV -->
+    <div class="navbar">
+      <div class="logo"><img src="logo.png" alt="Phantom Systems Logo"></div>
+      <ul class="nav-links">
+        <li><a href="dashboard-admin.html">Dashboard</a></li>
+        <li><a href="usermanagement.html">User Management</a></li>
+        <li><a href="admin-analytics.html">View Analytics</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </div>
+
+    <!-- header -->
+    <div class="header">
+      <div class="header-left">
+        <h1>USER MANAGEMENT</h1>
+        <p>Approve property listers, inspect profiles, and remove wayward spirits.</p>
+      </div>
+
+      <div class="header-right">
+        <div class="controls">
+          <div class="left">
+            <div class="search">
+              <input id="searchInput" placeholder="Search by name or email..." oninput="filterTable()" />
+            </div>
+            <button class="btn ghost" onclick="loadUsers()">Refresh</button>
+          </div>
+
+          <div>
+            <button class="btn primary" onclick="gotoAnalytics()">View Analytics</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- panel -->
+    <div class="panel">
+      <div id="tableWrapper">
+        <table class="users-table" id="usersTable" aria-live="polite">
+          <thead>
+            <tr>
+              <th class="cell">User</th>
+              <th class="cell">Email</th>
+              <th class="cell">Role</th>
+              <th class="cell" style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTbody">
+            <tr><td class="cell empty" colspan="4">Loading users…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- confirmation modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Confirm Action</h3>
+      <p id="modalText">Are you sure?</p>
+      <div class="row">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button id="modalConfirmBtn" class="btn action-remove" onclick="">Yes, proceed</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ------------------------
+  // User Management JS
+  // ------------------------
+  // The page uses existing endpoints:
+  // GET /api/admin/users            -> returns { success, users: [...] }
+  // GET /api/admin/pending-hosts    -> returns { success, pendingHosts: [...] }
+  // POST /api/admin/verify-host/:id -> verify host (existing)
+  // POST /api/admin/delete-user/:id -> delete user (placeholder endpoint - add server side)
+  //
+  // If your backend exposes different endpoints adapt the fetch URLs below.
+
+  let usersCache = [];
+  let pendingHosts = [];
+  const usersTbody = document.getElementById('usersTbody');
+  const searchInput = document.getElementById('searchInput');
+
+  // modal helpers
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalText = document.getElementById('modalText');
+  const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+
+  function openModal(text, confirmHandler, confirmLabel = 'Yes, proceed', danger=true) {
+    modalText.textContent = text;
+    modalConfirmBtn.textContent = confirmLabel;
+    modalConfirmBtn.className = 'btn ' + (danger ? 'action-remove' : 'action-approve');
+    modalConfirmBtn.onclick = () => { confirmHandler(); closeModal(); };
+    modalBackdrop.style.display = 'flex';
+  }
+  function closeModal() { modalBackdrop.style.display = 'none'; modalConfirmBtn.onclick = null; }
+
+  // Load users and pending hosts
+  async function loadUsers() {
+    usersTbody.innerHTML = `<tr><td class="cell empty" colspan="4">Loading users…</td></tr>`;
+    try {
+      const [usersRes, pendingRes] = await Promise.all([
+        fetch('/api/admin/users'),
+        fetch('/api/admin/pending-hosts')
+      ]);
+      const usersData = await usersRes.json();
+      const pendingData = await pendingRes.json();
+
+      if (!usersData.success) throw new Error('Failed to load users');
+      usersCache = usersData.users || [];
+
+      pendingHosts = (pendingData && pendingData.pendingHosts) ? pendingData.pendingHosts.map(h => h.userId) : [];
+
+      renderTable(usersCache);
+    } catch (err) {
+      console.error('Error loading users:', err);
+      usersTbody.innerHTML = `<tr><td class="cell empty" colspan="4">⚰️ Failed to load users</td></tr>`;
+    }
+  }
+
+  function renderTable(list) {
+    if (!list || list.length === 0) {
+      usersTbody.innerHTML = `<tr><td class="cell empty" colspan="4">No users found.</td></tr>`;
+      return;
+    }
+
+    const rows = list.map(u => {
+      const isPendingLister = (u.role === 'lister' && pendingHosts.includes(u.id));
+      const badgeHTML = roleBadgeHTML(u.role, isPendingLister);
+
+      const avatarSrc = u.avatar || 'avatar-placeholder.png'; // fallback
+      const userName = `${escapeHtml(u.firstName || '')} ${escapeHtml(u.lastName || '')}`.trim() || (u.name || 'Unknown');
+
+      return `
+      <tr id="user-row-${u.id}">
+        <td class="cell">
+          <div class="user-identity">
+            <img src="${avatarSrc}" alt="${userName}" class="avatar">
+            <div class="user-meta">
+              <strong>${userName}</strong>
+              <small>${escapeHtml(u.username || '')}</small>
+            </div>
+          </div>
+        </td>
+        <td class="cell">${escapeHtml(u.email || '')}</td>
+        <td class="cell">${badgeHTML}</td>
+        <td class="cell">
+          <div class="actions">
+            ${isPendingLister ? `<button class="action-small action-approve" onclick="confirmApprove(${u.id})">Approve</button>` : ''}
+            <button class="action-small" onclick="viewProfile(${u.id})">View</button>
+            <button class="action-small action-remove" onclick="confirmRemove(${u.id}, '${userName.replace(/'/g,"\\'")}')">Remove</button>
+          </div>
+        </td>
+      </tr>
+      `;
+    }).join('');
+
+    usersTbody.innerHTML = rows;
+  }
+
+  function roleBadgeHTML(role, isPending) {
+    switch(role) {
+      case 'admin':
+        return `<span class="role-badge badge-admin">Admin</span>`;
+      case 'lister':
+        if (isPending) return `<span class="role-badge badge-lister-pending">Pending Lister</span>`;
+        return `<span class="role-badge badge-lister-approved">Property Lister</span>`;
+      default:
+        return `<span class="role-badge badge-user">User</span>`;
+    }
+  }
+
+  // Approve a pending lister
+  function confirmApprove(userId) {
+    openModal('Approve this property lister? They will be allowed to list properties once verified.', async () => {
+      try {
+        const res = await fetch(`/api/admin/verify-host/${userId}`, { method:'POST' });
+        const data = await res.json();
+        alert(data.message || 'Approved.');
+        // update locally: remove from pendingHosts and re-render
+        pendingHosts = pendingHosts.filter(id => id !== userId);
+        // reload users to reflect verification flag
+        await loadUsers();
+      } catch (err) {
+        console.error('Approve error', err);
+        alert('⚰️ Failed to approve lister.');
+      }
+    }, 'Approve', false);
+  }
+
+  // Remove user
+  function confirmRemove(userId, userName) {
+    openModal(`Remove user "${userName}"? This action cannot be undone.`, async () => {
+      try {
+        // Try the generic delete endpoint (server: implement POST /api/admin/delete-user/:id)
+        const res = await fetch(`/api/admin/delete-user/${userId}`, { method:'POST' });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          // remove row
+          const row = document.getElementById(`user-row-${userId}`);
+          if (row) row.remove();
+          alert(data.message || 'User removed.');
+        } else {
+          // fallback for listers: call reject-host if present
+          if (pendingHosts.includes(userId)) {
+            const fallback = await fetch(`/api/admin/reject-host/${userId}`, { method:'POST' });
+            const fallbackData = await fallback.json();
+            if (fallback.ok && fallbackData.success) {
+              const row = document.getElementById(`user-row-${userId}`);
+              if (row) row.remove();
+              alert(fallbackData.message || 'User removed.');
+              await loadUsers();
+              return;
+            }
+          }
+          // generic fail
+          const msg = (data && data.message) ? data.message : 'Failed to remove user';
+          alert(msg);
+        }
+      } catch (err) {
+        console.error('Delete error', err);
+        alert('⚰️ Error removing user. Check server logs or add the delete API.');
+      }
+    }, 'Remove', true);
+  }
+
+  function viewProfile(userId) {
+    // Placeholder - point to profile page that you'll create later
+    window.location.href = `profile.html?id=${userId}`;
+  }
+
+  function filterTable() {
+    const q = (searchInput.value || '').toLowerCase().trim();
+    if (!q) {
+      renderTable(usersCache);
+      return;
+    }
+    const filtered = usersCache.filter(u => {
+      const fullname = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      const username = (u.username || '').toLowerCase();
+      return fullname.includes(q) || email.includes(q) || username.includes(q);
+    });
+    renderTable(filtered);
+  }
+
+  // redirect to analytics page
+  function gotoAnalytics() {
+    window.location.href = 'admin-analytics.html';
+  }
+
+  // escape HTML (simple)
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, s => ({
+      '&': '&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[s]);
+  }
+
+  // LOGOUT helper
+  async function logout() {
+    try {
+      await fetch('/api/logout', { method:'POST' });
+    } catch(e) { /* ignore */ }
+    window.location.href = 'loginpage.html';
+  }
+
+  // initial load
+  window.addEventListener('DOMContentLoaded', () => {
+    loadUsers();
+  });
+
+  // close modal on ESC or click backdrop
+  modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === modalBackdrop) closeModal();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  </script>
+</body>
+</html>

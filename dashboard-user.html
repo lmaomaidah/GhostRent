@@ -154,6 +154,25 @@
       transform: translateY(-3px);
       box-shadow: 0 16px 40px rgba(30,80,110,0.2);
     }
+
+    .cancel-btn {
+      padding: 10px 16px;
+      background: linear-gradient(180deg, #6b3a3a, #4a2424);
+      color: #ff9999;
+      border: 1px solid rgba(255, 107, 107, 0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: "Cinzel", serif;
+      font-weight: 700;
+      transition: all .18s ease;
+      box-shadow: 0 12px 30px rgba(200, 80, 80, 0.08);
+    }
+
+    .cancel-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(200, 80, 80, 0.16);
+      background: linear-gradient(180deg, #7d4444, #572d2d);
+    }
     
     /* BOOKING CARDS */
     .booking-card {
@@ -360,6 +379,31 @@
         console.error('Error loading bookings:', error);
         document.getElementById('bookings-container').innerHTML = 
           '<div class="no-data">⚰️ Failed to load bookings</div>';
+      }
+    }
+
+    async function cancelBooking(bookingId, propertyTitle) {
+      if (!confirm(`Are you sure you want to cancel your booking for ${propertyTitle}?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/bookings/${bookingId}`, {
+          method: 'DELETE',
+          credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('✅ ' + data.message);
+          loadBookings(); // Refresh bookings list
+        } else {
+          alert('⚰️ ' + data.message);
+        }
+      } catch (error) {
+        console.error('Cancel booking error:', error);
+        alert('⚰️ Failed to cancel booking');
       }
     }
     
