@@ -174,7 +174,7 @@
   <nav class="navbar">
     <div class="logo"><img src="logo.png" alt="Phantom Systems Logo"></div>
     <ul class="nav-links">
-      <li><a href="admin-dashboard.html">Dashboard</a></li>
+      <li><a href="dashboard-admin.html">Dashboard</a></li>
       <li><a href="admin-analytics.html" style="text-decoration:underline;">Analytics</a></li>
       <li><a href="#" onclick="showSection('pending')">Approve Listings</a></li>
       <li><a href="#" onclick="showSection('users')">Manage Users</a></li>
@@ -608,11 +608,11 @@
     function viewDetail(type) {
       // route to sections of admin dashboard (you can wire these)
       if (type === 'revenue' || type === 'orders' || type === 'bookings') {
-        window.location.href = 'admin-dashboard.html#bookings-section';
+        window.location.href = 'dashboard-admin.html#bookings-section';
       } else if (type === 'users') {
-        window.location.href = 'admin-dashboard.html#users-section';
+        window.location.href = 'dashboard-admin.html#users-section';
       } else if (type === 'listers') {
-        window.location.href = 'admin-dashboard.html#pending-section';
+        window.location.href = 'dashboard-admin.html#pending-section';
       }
     }
 

@@ -15,7 +15,6 @@ body {
   color: #e8e8e8;
   font-family: "Cinzel", serif;
   position: relative;
-  overflow: auto;
 }
 
 .overlay {

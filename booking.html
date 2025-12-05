@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ghost Rent – Secure Payment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Griffy&family=Cinzel:wght@400;700&family=Henny+Penny&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-midnight: #0a0f1a;
+      --bg-deep: #0d1b2a;
+      --bg-indigo: #102542;
+      --muted: #c3c8cc;
+      --accent: #6fb3d6;
+      --glass: rgba(255,255,255,0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Cinzel', serif;
+      background: linear-gradient(150deg, var(--bg-midnight), var(--bg-deep), var(--bg-indigo));
+      color: var(--muted);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(3,6,12,0.35), rgba(2,4,8,0.55));
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .page-title {
+      font-family: 'Henny Penny', cursive;
+      font-size: 2.5rem;
+      color: #e8f6fb;
+      margin-bottom: 10px;
+      text-shadow: 0 0 15px rgba(120,190,220,0.5);
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .payment-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      margin-top: 30px;
+    }
+
+    .payment-form {
+      background: linear-gradient(180deg, rgba(12,16,20,0.7), rgba(8,10,14,0.6));
+      border-radius: 14px;
+      padding: 28px;
+      border: 1px solid var(--glass);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+    }
+
+    .form-section {
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-family: 'Griffy', cursive;
+      font-size: 1.4rem;
+      color: #eef6f6;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      background: rgba(4,8,12,0.55);
+      border: 1px solid var(--glass);
+      border-radius: 8px;
+      color: #e7faff;
+      font-family: 'Cinzel', serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(157,217,255,0.3);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+    }
+
+    .payment-methods {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .payment-method {
+      flex: 1;
+      padding: 16px;
+      background: rgba(255,255,255,0.02);
+      border: 2px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .payment-method:hover {
+      border-color: rgba(157,217,255,0.3);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .payment-method.active {
+      border-color: var(--accent);
+      background: rgba(111,179,214,0.1);
+    }
+
+    .payment-method-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .payment-method-name {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .order-summary {
+      background: linear-gradient(180deg, rgba(12,16,20,0.7), rgba(8,10,14,0.6));
+      border-radius: 14px;
+      padding: 24px;
+      border: 1px solid var(--glass);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      position: sticky;
+      top: 20px;
+    }
+
+    .summary-title {
+      font-family: 'Griffy', cursive;
+      font-size: 1.3rem;
+      color: #eef6f6;
+      margin-bottom: 20px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--muted);
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+
+    .summary-item.total {
+      margin-top: 12px;
+      padding-top: 16px;
+      border-top: 2px solid rgba(255,255,255,0.1);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(180deg, #143b55, #0c2b40);
+      border: 1px solid rgba(120,200,240,0.06);
+      color: #e7fbff;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+      margin-top: 20px;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(30,80,110,0.25);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .security-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: rgba(81,207,102,0.1);
+      border: 1px solid rgba(81,207,102,0.2);
+      border-radius: 8px;
+      color: #51cf66;
+      font-size: 0.85rem;
+      margin-top: 16px;
+    }
+
+    .success-page {
+      display: none;
+      text-align: center;
+      max-width: 600px;
+      margin: 80px auto;
+      background: linear-gradient(180deg, rgba(12,16,20,0.7), rgba(8,10,14,0.6));
+      border-radius: 14px;
+      padding: 40px;
+      border: 1px solid var(--glass);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+    }
+
+    .success-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .success-title {
+      font-family: 'Henny Penny', cursive;
+      font-size: 2rem;
+      color: #51cf66;
+      margin-bottom: 16px;
+    }
+
+    .confirmation-number {
+      font-size: 1.5rem;
+      font-family: 'Griffy', cursive;
+      color: var(--accent);
+      margin: 20px 0;
+    }
+
+    .success-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0b1724;
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: #e7faff;
+      border: 1px solid var(--glass);
+    }
+
+    @media (max-width: 900px) {
+      .payment-grid {
+        grid-template-columns: 1fr;
+      }
+      .order-summary {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <div id="paymentPage" class="container">
+    <div class="page-header">
+      <h1 class="page-title">👻 Secure Payment</h1>
+      <p class="page-subtitle">Complete your haunted reservation</p>
+    </div>
+
+    <div class="payment-grid">
+      <div class="payment-form">
+        <div class="form-section">
+          <h2 class="section-title">Payment Method</h2>
+          <div class="payment-methods">
+            <div class="payment-method active" onclick="selectPaymentMethod('card')">
+              <div class="payment-method-icon">💳</div>
+              <div class="payment-method-name">Credit Card</div>
+            </div>
+            <div class="payment-method" onclick="selectPaymentMethod('paypal')">
+              <div class="payment-method-icon">🅿️</div>
+              <div class="payment-method-name">PayPal</div>
+            </div>
+            <div class="payment-method" onclick="selectPaymentMethod('crypto')">
+              <div class="payment-method-icon">₿</div>
+              <div class="payment-method-name">Crypto</div>
+            </div>
+          </div>
+        </div>
+
+        <form id="paymentForm" onsubmit="return false;">
+          <div id="cardFields">
+            <div class="form-section">
+              <h2 class="section-title">Card Information</h2>
+              
+              <div class="form-group">
+                <label for="cardNumber">Card Number</label>
+                <input 
+                  type="text" 
+                  id="cardNumber" 
+                  placeholder="1234 5678 9012 3456"
+                  maxlength="19"
+                  required
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="cardholderName">Cardholder Name</label>
+                <input 
+                  type="text" 
+                  id="cardholderName" 
+                  placeholder="John Doe"
+                  required
+                >
+              </div>
+
+              <div class="card-grid">
+                <div class="form-group">
+                  <label for="cardExpiry">Expiry Date</label>
+                  <input 
+                    type="text" 
+                    id="cardExpiry" 
+                    placeholder="MM/YY"
+                    maxlength="5"
+                    required
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="cardCVV">CVV</label>
+                  <input 
+                    type="text" 
+                    id="cardCVV" 
+                    placeholder="123"
+                    maxlength="4"
+                    required
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h2 class="section-title">Billing Address</h2>
+              
+              <div class="form-group">
+                <label for="billingAddress">Street Address</label>
+                <input 
+                  type="text" 
+                  id="billingAddress" 
+                  placeholder="123 Haunted Lane"
+                  required
+                >
+              </div>
+
+              <div class="card-grid">
+                <div class="form-group">
+                  <label for="billingCity">City</label>
+                  <input 
+                    type="text" 
+                    id="billingCity" 
+                    placeholder="Salem"
+                    required
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="billingZip">ZIP Code</label>
+                  <input 
+                    type="text" 
+                    id="billingZip" 
+                    placeholder="12345"
+                    required
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="security-note">
+            <span>🔒</span>
+            <span>Your payment information is secure and encrypted</span>
+          </div>
+
+          <button type="submit" class="submit-btn" onclick="processPayment()">
+            Complete Payment
+          </button>
+        </form>
+      </div>
+
+      <div class="order-summary">
+        <h3 class="summary-title">Order Summary</h3>
+        
+        <div class="summary-item">
+          <span>Property:</span>
+          <span id="summaryProperty">-</span>
+        </div>
+        
+        <div class="summary-item">
+          <span>Check-in:</span>
+          <span id="summaryCheckin">-</span>
+        </div>
+        
+        <div class="summary-item">
+          <span>Check-out:</span>
+          <span id="summaryCheckout">-</span>
+        </div>
+        
+        <div class="summary-item">
+          <span>Nights:</span>
+          <span id="summaryNights">-</span>
+        </div>
+        
+        <div class="summary-item">
+          <span>Room Type:</span>
+          <span id="summaryRoom">-</span>
+        </div>
+        
+        <div class="summary-item">
+          <span>Subtotal:</span>
+          <span id="summarySubtotal">$0</span>
+        </div>
+        
+        <div class="summary-item">
+          <span>Tax (5%):</span>
+          <span id="summaryTax">$0</span>
+        </div>
+        
+        <div class="summary-item total">
+          <span>Total:</span>
+          <span id="summaryTotal">$0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="successPage" class="success-page">
+    <div class="success-icon">🎃</div>
+    <h2 class="success-title">Payment Successful!</h2>
+    <p style="color: var(--muted); margin: 16px 0;">
+      Your haunted reservation has been confirmed. We've sent a confirmation email with all the details.
+    </p>
+    
+    <div class="confirmation-number">
+      Confirmation: <span id="confirmationNumber">-</span>
+    </div>
+    
+    <div class="success-actions">
+      <button class="btn btn-primary" onclick="window.location.href='dashboard-user.html'">
+        View My Bookings
+      </button>
+      <button class="btn btn-secondary" onclick="window.location.href='property-list.html'">
+        Browse More Properties
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentPaymentMethod = 'card';
+    let bookingData = null;
+
+    function formatMoney(amount) {
+      return '$' + Number(amount).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function selectPaymentMethod(method) {
+      currentPaymentMethod = method;
+      
+      document.querySelectorAll('.payment-method').forEach(el => {
+        el.classList.remove('active');
+      });
+      
+      event.target.closest('.payment-method').classList.add('active');
+      
+      // Show/hide card fields based on method
+      const cardFields = document.getElementById('cardFields');
+      if (method === 'card') {
+        cardFields.style.display = 'block';
+      } else {
+        cardFields.style.display = 'none';
+      }
+    }
+
+    function loadBookingData() {
+      try {
+        const stored = localStorage.getItem('ghostrent_booking');
+        if (!stored) {
+          alert('⚠️ No booking data found. Redirecting to property listings...');
+          window.location.href = 'property-list.html';
+          return;
+        }
+        
+        bookingData = JSON.parse(stored);
+        
+        // Populate summary
+        document.getElementById('summaryProperty').textContent = bookingData.propertyTitle || '-';
+        document.getElementById('summaryCheckin').textContent = new Date(bookingData.checkin).toLocaleDateString();
+        document.getElementById('summaryCheckout').textContent = new Date(bookingData.checkout).toLocaleDateString();
+        document.getElementById('summaryNights').textContent = bookingData.nights + ' night' + (bookingData.nights > 1 ? 's' : '');
+        document.getElementById('summaryRoom').textContent = bookingData.roomType || 'Standard';
+        document.getElementById('summarySubtotal').textContent = formatMoney(bookingData.subtotal);
+        document.getElementById('summaryTax').textContent = formatMoney(bookingData.tax);
+        document.getElementById('summaryTotal').textContent = formatMoney(bookingData.total);
+        
+      } catch (error) {
+        console.error('Error loading booking:', error);
+        alert('⚠️ Failed to load booking data');
+        window.location.href = 'property-list.html';
+      }
+    }
+
+    // Format card number as user types
+    document.getElementById('cardNumber').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\s/g, '');
+      let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+      e.target.value = formattedValue;
+    });
+
+    // Format expiry date
+    document.getElementById('cardExpiry').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length >= 2) {
+        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+      }
+      e.target.value = value;
+    });
+
+    // Only allow numbers in CVV
+    document.getElementById('cardCVV').addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+
+    async function processPayment() {
+      if (!bookingData) {
+        alert('⚠️ Booking data is missing');
+        return;
+      }
+
+      // Validate form
+      if (currentPaymentMethod === 'card') {
+        const cardNumber = document.getElementById('cardNumber').value;
+        const cardExpiry = document.getElementById('cardExpiry').value;
+        const cardCVV = document.getElementById('cardCVV').value;
+        const cardholderName = document.getElementById('cardholderName').value;
+
+        if (!cardNumber || !cardExpiry || !cardCVV || !cardholderName) {
+          alert('⚠️ Please fill in all card details');
+          return;
+        }
+      }
+
+      // Show loading state
+      const submitBtn = document.querySelector('.submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing Payment...';
+
+      try {
+        const response = await fetch('/api/payments/process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            bookingData: bookingData,
+            paymentMethod: currentPaymentMethod,
+            cardNumber: document.getElementById('cardNumber').value,
+            cardExpiry: document.getElementById('cardExpiry').value,
+            cardCVV: document.getElementById('cardCVV').value,
+            cardholderName: document.getElementById('cardholderName').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Clear booking data
+          localStorage.removeItem('ghostrent_booking');
+          
+          // Show success page
+          document.getElementById('paymentPage').style.display = 'none';
+          document.getElementById('successPage').style.display = 'block';
+          document.getElementById('confirmationNumber').textContent = data.payment.confirmationNumber;
+          
+          // Scroll to top
+          window.scrollTo(0, 0);
+        } else {
+          alert('❌ ' + data.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Complete Payment';
+        }
+
+      } catch (error) {
+        console.error('Payment error:', error);
+        alert('⚰️ Payment processing failed. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Complete Payment';
+      }
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      loadBookingData();
+    });
+  </script>
+</body>
+</html>

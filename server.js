@@ -1039,6 +1039,392 @@ app.get('/api/admin/analytics',
   }
 );
 
+// Add these new endpoints to your server.js file
+
+// ====================================
+// US-12, US-13: ANALYTICS ENDPOINTS
+// ====================================
+
+app.get('/api/analytics/revenue', authenticateToken, requireRole('admin'), (req, res) => {
+  const days = parseInt(req.query.days) || 30;
+  const labels = [];
+  const values = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    labels.push(dateStr);
+    
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+    const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+    
+    const dayRevenue = bookings.filter(b => {
+      const bookingDate = new Date(b.createdAt);
+      return bookingDate >= dayStart && bookingDate <= dayEnd;
+    }).reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+    
+    values.push(dayRevenue);
+  }
+  
+  res.json({ success: true, labels, values });
+});
+
+app.get('/api/analytics/orders', authenticateToken, requireRole('admin'), (req, res) => {
+  const days = parseInt(req.query.days) || 30;
+  const labels = [];
+  const values = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    labels.push(dateStr);
+    
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+    const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+    
+    const dayOrders = bookings.filter(b => {
+      const bookingDate = new Date(b.createdAt);
+      return bookingDate >= dayStart && bookingDate <= dayEnd;
+    }).length;
+    
+    values.push(dayOrders);
+  }
+  
+  res.json({ success: true, labels, values });
+});
+
+app.get('/api/analytics/bookings', authenticateToken, requireRole('admin'), (req, res) => {
+  const days = parseInt(req.query.days) || 30;
+  const labels = [];
+  const values = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    labels.push(dateStr);
+    
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+    const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+    
+    const dayBookings = bookings.filter(b => {
+      const bookingDate = new Date(b.createdAt);
+      return bookingDate >= dayStart && bookingDate <= dayEnd;
+    }).length;
+    
+    values.push(dayBookings);
+  }
+  
+  res.json({ success: true, labels, values });
+});
+
+app.get('/api/analytics/users', authenticateToken, requireRole('admin'), (req, res) => {
+  const days = parseInt(req.query.days) || 30;
+  const labels = [];
+  const values = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    labels.push(dateStr);
+    
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+    const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+    
+    const newUsers = users.filter(u => {
+      const userDate = new Date(u.createdAt);
+      return u.role === 'user' && userDate >= dayStart && userDate <= dayEnd;
+    }).length;
+    
+    values.push(newUsers);
+  }
+  
+  res.json({ success: true, labels, values });
+});
+
+app.get('/api/analytics/listers', authenticateToken, requireRole('admin'), (req, res) => {
+  const days = parseInt(req.query.days) || 30;
+  const labels = [];
+  const values = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    labels.push(dateStr);
+    
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+    const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+    
+    const newListers = users.filter(u => {
+      const userDate = new Date(u.createdAt);
+      return u.role === 'lister' && userDate >= dayStart && userDate <= dayEnd;
+    }).length;
+    
+    values.push(newListers);
+  }
+  
+  res.json({ success: true, labels, values });
+});
+
+app.get('/api/analytics/categories', authenticateToken, requireRole('admin'), (req, res) => {
+  const categoryBookings = {};
+  
+  bookings.forEach(booking => {
+    const property = properties.find(p => p.id === booking.propertyId);
+    if (property) {
+      let category = 'Other';
+      const titleLower = (property.title || '').toLowerCase();
+      if (titleLower.includes('manor')) category = 'Manor';
+      else if (titleLower.includes('cottage')) category = 'Cottage';
+      else if (titleLower.includes('mansion')) category = 'Mansion';
+      else if (titleLower.includes('castle')) category = 'Castle';
+      else if (titleLower.includes('villa')) category = 'Villa';
+      
+      categoryBookings[category] = (categoryBookings[category] || 0) + 1;
+    }
+  });
+  
+  if (Object.keys(categoryBookings).length === 0) {
+    categoryBookings['Manor'] = 0;
+    categoryBookings['Cottage'] = 0;
+    categoryBookings['Mansion'] = 0;
+    categoryBookings['Castle'] = 0;
+  }
+  
+  res.json({
+    success: true,
+    labels: Object.keys(categoryBookings),
+    values: Object.values(categoryBookings)
+  });
+});
+
+// ====================================
+// US-14, US-15: PAYMENT ENDPOINTS
+// ====================================
+
+app.post('/api/payments/process', authenticateToken, requireRole('user'), async (req, res) => {
+  try {
+    const {
+      bookingData,
+      paymentMethod,
+      cardNumber,
+      cardExpiry,
+      cardCVV,
+      cardholderName
+    } = req.body;
+
+    // Validate payment data
+    if (!bookingData || !paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: '❌ Missing required payment information!'
+      });
+    }
+
+    // Validate card details (basic validation)
+    if (paymentMethod === 'card') {
+      if (!cardNumber || !cardExpiry || !cardCVV || !cardholderName) {
+        return res.status(400).json({
+          success: false,
+          message: '❌ Complete card details are required!'
+        });
+      }
+
+      // Basic card number validation (should be 16 digits)
+      if (!/^\d{16}$/.test(cardNumber.replace(/\s/g, ''))) {
+        return res.status(400).json({
+          success: false,
+          message: '❌ Invalid card number format!'
+        });
+      }
+
+      // Basic expiry validation (MM/YY)
+      if (!/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+        return res.status(400).json({
+          success: false,
+          message: '❌ Invalid expiry date format! Use MM/YY'
+        });
+      }
+
+      // Basic CVV validation (3 or 4 digits)
+      if (!/^\d{3,4}$/.test(cardCVV)) {
+        return res.status(400).json({
+          success: false,
+          message: '❌ Invalid CVV format!'
+        });
+      }
+    }
+
+    // Find the property
+    const property = properties.find(p => p.id === parseInt(bookingData.propertyId));
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: '👻 Property not found!'
+      });
+    }
+
+    if (!property.available) {
+      return res.status(400).json({
+        success: false,
+        message: '🚫 This property is not available for booking!'
+      });
+    }
+
+    // Create the booking
+    const newBooking = {
+      id: generateId(bookings),
+      userId: req.user.userId,
+      propertyId: property.id,
+      checkIn: bookingData.checkin,
+      checkOut: bookingData.checkout,
+      nights: bookingData.nights,
+      guests: bookingData.guests,
+      roomType: bookingData.roomType,
+      addons: bookingData.addons || [],
+      specialRequests: bookingData.specialRequests,
+      status: 'confirmed',
+      totalPrice: bookingData.total,
+      paymentMethod: paymentMethod,
+      paymentStatus: 'completed',
+      paymentDate: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    bookings.push(newBooking);
+
+    // Generate payment confirmation number
+    const confirmationNumber = `GR${Date.now()}-${newBooking.id}`;
+
+    console.log(`💳 Payment processed: ${confirmationNumber} for ${req.user.name}`);
+
+    res.status(200).json({
+      success: true,
+      message: '🎃 Payment successful! Your haunted stay has been confirmed.',
+      booking: newBooking,
+      payment: {
+        confirmationNumber,
+        amount: bookingData.total,
+        paymentMethod,
+        status: 'completed',
+        date: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error('Payment processing error:', error);
+    res.status(500).json({
+      success: false,
+      message: '⚰️ Payment processing failed. Please try again.'
+    });
+  }
+});
+
+// Get payment confirmation details
+app.get('/api/payments/confirmation/:bookingId', authenticateToken, (req, res) => {
+  const bookingId = parseInt(req.params.bookingId);
+  const booking = bookings.find(b => b.id === bookingId);
+  
+  if (!booking) {
+    return res.status(404).json({
+      success: false,
+      message: '👻 Booking not found!'
+    });
+  }
+  
+  // Check if user owns this booking or is admin
+  if (booking.userId !== req.user.userId && req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: '🚫 You cannot access this booking!'
+    });
+  }
+  
+  const property = properties.find(p => p.id === booking.propertyId);
+  const user = findUserById(booking.userId);
+  
+  res.json({
+    success: true,
+    booking: {
+      ...booking,
+      propertyTitle: property ? property.title : 'Unknown',
+      propertyLocation: property ? property.location : 'Unknown',
+      userName: `${user.firstName} ${user.lastName}`,
+      userEmail: user.email
+    }
+  });
+});
+
+// ====================================
+// ADMIN: DELETE LISTER
+// ====================================
+app.delete('/api/admin/users/:userId', authenticateToken, requireRole('admin'), (req, res) => {
+  const userId = parseInt(req.params.userId);
+  
+  const userIndex = users.findIndex(u => u.id === userId);
+  if (userIndex === -1) {
+    return res.status(404).json({
+      success: false,
+      message: '👻 User not found!'
+    });
+  }
+  
+  const user = users[userIndex];
+  
+  // Prevent deleting yourself
+  if (user.id === req.user.userId) {
+    return res.status(400).json({
+      success: false,
+      message: '⚠️ You cannot delete your own admin account!'
+    });
+  }
+  
+  // If lister, delete their properties and host record
+  if (user.role === 'lister') {
+    const userProperties = properties.filter(p => p.ownerId === userId);
+    userProperties.forEach(prop => {
+      if (prop.image) {
+        const imagePath = path.join(__dirname, prop.image);
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+      }
+    });
+    
+    // Remove properties
+    const propertyIds = userProperties.map(p => p.id);
+    propertyIds.forEach(id => {
+      const idx = properties.findIndex(p => p.id === id);
+      if (idx > -1) properties.splice(idx, 1);
+    });
+    
+    // Remove host record
+    const hostIndex = hosts.findIndex(h => h.userId === userId);
+    if (hostIndex > -1) hosts.splice(hostIndex, 1);
+  }
+  
+  // Delete user's bookings
+  const userBookingIds = bookings.filter(b => b.userId === userId).map(b => b.id);
+  userBookingIds.forEach(id => {
+    const idx = bookings.findIndex(b => b.id === id);
+    if (idx > -1) bookings.splice(idx, 1);
+  });
+  
+  users.splice(userIndex, 1);
+  
+  console.log(`🗑️ Admin deleted user: ${user.email}`);
+  
+  res.status(200).json({
+    success: true,
+    message: `🗑️ User ${user.firstName} ${user.lastName} has been permanently deleted.`
+  });
+});
+
 // ====================================
 // UTILITY ENDPOINTS
 // ====================================
