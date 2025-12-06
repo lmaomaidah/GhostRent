@@ -667,7 +667,7 @@ body {
 
     <div class="summary-item">
       <span class="label">Discount</span>
-      <span class="value" id="sum-discount">0 PKR</span>
+      <span class="value" id="sum-discount">0 $</span>
     </div>
 
     <div class="total">
@@ -765,18 +765,18 @@ let propertyName = 'Haunted Mansion';
 
 function loadSummary() {
   document.getElementById("sum-title").innerText = propertyName;
-  document.getElementById("sum-price").innerText = basePrice + " PKR";
+  document.getElementById("sum-price").innerText = basePrice + " $";
   document.getElementById("sum-nights").innerText = nights;
 
   let subtotal = basePrice * nights;
   let tax = subtotal * taxRate;
   let afterTax = subtotal + tax;
 
-  document.getElementById("sum-tax").innerText = tax.toFixed(0) + " PKR";
-  document.getElementById("sum-discount").innerText = appliedDiscount.toFixed(0) + " PKR";
+  document.getElementById("sum-tax").innerText = tax.toFixed(0) + " $";
+  document.getElementById("sum-discount").innerText = appliedDiscount.toFixed(0) + " $";
 
   let total = afterTax - appliedDiscount;
-  document.getElementById("sum-total").innerText = total.toFixed(0) + " PKR";
+  document.getElementById("sum-total").innerText = total.toFixed(0) + " $";
 }
 
 function applyPromo() {
@@ -1009,7 +1009,7 @@ function processSuccessfulPayment() {
   // Update modal
   document.getElementById('confirmationNumber').textContent = confirmationNum;
   document.getElementById('modalProperty').textContent = propertyName;
-  document.getElementById('modalTotal').textContent = total.toFixed(0) + ' PKR';
+  document.getElementById('modalTotal').textContent = total.toFixed(0) + ' $';
   
   modalButtons.innerHTML = `
     <button class="modal-btn" onclick="goToDashboard()">View My Bookings</button>
