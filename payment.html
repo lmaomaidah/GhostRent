@@ -755,7 +755,8 @@ body {
 
 <!-- JS -->
 <script>
-let basePrice = 6000; 
+// Defaults
+let basePrice = 6000;
 let nights = 1;
 let taxRate = 0.05;
 let appliedDiscount = 0;
@@ -763,20 +764,46 @@ let promoUsed = false;
 let selectedMethod = 'easypaisa';
 let propertyName = 'Haunted Mansion';
 
+// Try to load booking saved by booking.html (key: 'ghostrent_booking')
+(function loadBookingFromLocalStorage(){
+  try {
+    const raw = localStorage.getItem('ghostrent_booking');
+    if (!raw) return;
+    const booking = JSON.parse(raw);
+    if (!booking) return;
+
+    // booking has: pricePerNight, roomExtraPerNight, nights, propertyTitle, subtotal, tax, total, ...
+    nights = Number(booking.nights) || nights;
+    const roomExtra = Number(booking.roomExtraPerNight || 0);
+    basePrice = Number(booking.pricePerNight || basePrice) + roomExtra;
+    propertyName = booking.propertyTitle || propertyName;
+
+    // If booking saved a discount field (optional), load it
+    if (booking.appliedDiscount) {
+      appliedDiscount = Number(booking.appliedDiscount) || 0;
+      promoUsed = true;
+    }
+  } catch (e) {
+    console.warn('Failed to load booking from localStorage:', e);
+  }
+})();
+
+function formatMoney(n){ return '$' + Number(n).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+
 function loadSummary() {
   document.getElementById("sum-title").innerText = propertyName;
-  document.getElementById("sum-price").innerText = basePrice + " $";
+  document.getElementById("sum-price").innerText = formatMoney(basePrice) + ' / night';
   document.getElementById("sum-nights").innerText = nights;
 
   let subtotal = basePrice * nights;
   let tax = subtotal * taxRate;
   let afterTax = subtotal + tax;
 
-  document.getElementById("sum-tax").innerText = tax.toFixed(0) + " $";
-  document.getElementById("sum-discount").innerText = appliedDiscount.toFixed(0) + " $";
+  document.getElementById("sum-tax").innerText = formatMoney(tax);
+  document.getElementById("sum-discount").innerText = formatMoney(appliedDiscount);
 
   let total = afterTax - appliedDiscount;
-  document.getElementById("sum-total").innerText = total.toFixed(0) + " $";
+  document.getElementById("sum-total").innerText = formatMoney(total);
 }
 
 function applyPromo() {
