@@ -1542,6 +1542,171 @@ app.get('/api/properties/search', authenticateToken, (req, res) => {
   });
 });
 
+// Add these to your server.js file
+
+// ====================================
+// REVIEWS SYSTEM
+// ====================================
+const reviews = []; // Add this at the top with other in-memory databases
+
+// Get reviews for a property
+app.get('/api/properties/:propertyId/reviews', (req, res) => {
+  const propertyId = parseInt(req.params.propertyId);
+  const propertyReviews = reviews.filter(r => r.propertyId === propertyId);
+  
+  res.json({
+    success: true,
+    reviews: propertyReviews
+  });
+});
+
+// Submit a review (requires user to have booked the property)
+app.post('/api/properties/:propertyId/reviews', authenticateToken, requireRole('user'), (req, res) => {
+  const propertyId = parseInt(req.params.propertyId);
+  const { rating, text } = req.body;
+  
+  if (!rating || !text) {
+    return res.status(400).json({
+      success: false,
+      message: '⚠️ Rating and review text are required!'
+    });
+  }
+  
+  if (rating < 1 || rating > 5) {
+    return res.status(400).json({
+      success: false,
+      message: '⚠️ Rating must be between 1 and 5!'
+    });
+  }
+  
+  const property = properties.find(p => p.id === propertyId);
+  if (!property) {
+    return res.status(404).json({
+      success: false,
+      message: '👻 Property not found!'
+    });
+  }
+  
+  // Check if user has booked this property
+  const hasBooked = bookings.some(b => 
+    b.userId === req.user.userId && 
+    b.propertyId === propertyId && 
+    b.status === 'confirmed'
+  );
+  
+  if (!hasBooked) {
+    return res.status(403).json({
+      success: false,
+      message: '🚫 You can only review properties you have booked!'
+    });
+  }
+  
+  // Check if user already reviewed this property
+  const existingReview = reviews.find(r => 
+    r.userId === req.user.userId && r.propertyId === propertyId
+  );
+  
+  if (existingReview) {
+    return res.status(400).json({
+      success: false,
+      message: '⚠️ You have already reviewed this property!'
+    });
+  }
+  
+  const user = findUserById(req.user.userId);
+  
+  const newReview = {
+    id: generateId(reviews),
+    propertyId,
+    userId: req.user.userId,
+    userName: `${user.firstName} ${user.lastName.charAt(0)}.`,
+    rating,
+    text,
+    date: new Date().toISOString()
+  };
+  
+  reviews.push(newReview);
+  
+  console.log(`⭐ New review submitted by ${user.email} for property ${property.title}`);
+  
+  res.status(201).json({
+    success: true,
+    message: '✨ Review submitted successfully!',
+    review: newReview
+  });
+});
+
+// Get user's bookings with full property details
+app.get('/api/bookings/detailed', authenticateToken, requireRole('user'), (req, res) => {
+  const userBookings = bookings
+    .filter(b => b.userId === req.user.userId)
+    .map(b => {
+      const property = properties.find(p => p.id === b.propertyId);
+      const owner = property ? findUserById(property.ownerId) : null;
+      
+      return {
+        ...b,
+        property: property ? {
+          id: property.id,
+          title: property.title,
+          location: property.location,
+          image: property.image,
+          haunting_level: property.haunting_level,
+          price: property.price,
+          ownerName: owner ? `${owner.firstName} ${owner.lastName}` : 'Unknown'
+        } : null
+      };
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  res.status(200).json({
+    success: true,
+    bookings: userBookings
+  });
+});
+
+// Cancel booking endpoint (enhanced)
+app.post('/api/bookings/:bookingId/cancel', 
+  authenticateToken, 
+  requireRole('user'),
+  (req, res) => {
+    const bookingId = parseInt(req.params.bookingId);
+    const booking = bookings.find(b => b.id === bookingId);
+    
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: '👻 Booking not found!'
+      });
+    }
+    
+    if (booking.userId !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: '🚫 You can only cancel your own bookings!'
+      });
+    }
+    
+    if (booking.status === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: '⚠️ This booking is already cancelled!'
+      });
+    }
+    
+    // Update status instead of deleting
+    booking.status = 'cancelled';
+    booking.cancelledAt = new Date().toISOString();
+    
+    console.log(`❌ Booking cancelled: ID ${bookingId} by user ${req.user.userId}`);
+    
+    res.status(200).json({
+      success: true,
+      message: '❌ Booking cancelled successfully!'
+    });
+  }
+);
+
 // ====================================
 // ERROR HANDLING
 // ====================================

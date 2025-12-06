@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ghost Rent | User Dashboard</title>
+  <title>Ghost Rent | My Dashboard</title>
   <link rel="stylesheet" href="dashboard.css">
-  <link href="https://fonts.googleapis.com/css2?family=Griffy&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Griffy&family=Cinzel:wght@400;700&family=Henny+Penny&display=swap" rel="stylesheet">
   <style>
     body {
       min-height: 100vh;
@@ -23,7 +23,7 @@
       padding: 20px;
       background: rgba(28, 31, 38, 0.8);
       border-radius: 15px;
-      max-width: 1200px;
+      max-width: 1400px;
     }
     
     .section-title {
@@ -33,7 +33,206 @@
       margin-bottom: 20px;
     }
     
-    /* IMPROVED PROPERTIES GRID */
+    /* BOOKING CARDS WITH IMAGES */
+    .bookings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 24px;
+      margin-top: 20px;
+    }
+    
+    .booking-card {
+      background: linear-gradient(180deg, rgba(12,16,20,0.6), rgba(6,10,14,0.55));
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.02);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+      transition: transform .22s cubic-bezier(.2,.9,.2,1), box-shadow .2s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .booking-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.06)),
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,0.015), transparent 12%);
+      mix-blend-mode: overlay;
+      pointer-events: none;
+    }
+
+    .booking-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.75), 0 0 40px rgba(40,90,130,0.08);
+    }
+
+    .booking-image {
+      height: 200px;
+      background: #0d0f11;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .booking-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(.85) saturate(.92);
+      transition: transform 0.3s;
+    }
+
+    .booking-card:hover .booking-image img {
+      transform: scale(1.05);
+    }
+
+    .booking-status-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .status-confirmed {
+      background: rgba(81, 207, 102, 0.9);
+      color: white;
+    }
+
+    .status-pending {
+      background: rgba(255, 193, 7, 0.9);
+      color: white;
+    }
+
+    .status-cancelled {
+      background: rgba(255, 107, 107, 0.9);
+      color: white;
+    }
+
+    .booking-body {
+      padding: 18px;
+    }
+    
+    .property-title {
+      font-size: 1.3rem;
+      color: #eef6f6;
+      margin-bottom: 10px;
+      font-family: "Griffy", cursive;
+      line-height: 1.3;
+    }
+    
+    .booking-detail {
+      color: #bfc8c9;
+      margin: 8px 0;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .booking-detail strong {
+      color: #e7faff;
+      font-weight: 600;
+    }
+
+    .booking-price {
+      font-size: 1.4rem;
+      color: #51cf66;
+      font-weight: 700;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .booking-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: "Cinzel", serif;
+      font-weight: 700;
+      transition: all .18s ease;
+      font-size: 0.9rem;
+    }
+
+    .view-btn {
+      background: linear-gradient(180deg, #143b55, #0c2b40);
+      color: #e7fbff;
+      border: 1px solid rgba(120,200,240,0.06);
+      box-shadow: 0 12px 30px rgba(30,80,110,0.12);
+    }
+
+    .view-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(30,80,110,0.2);
+    }
+
+    .cancel-btn {
+      background: rgba(255, 107, 107, 0.2);
+      color: #ff6b6b;
+      border: 1px solid #ff6b6b;
+    }
+
+    .cancel-btn:hover:not(:disabled) {
+      background: rgba(255, 107, 107, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .cancel-btn:disabled,
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .review-btn {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+      border: 1px solid #ffc107;
+    }
+
+    .review-btn:hover:not(:disabled) {
+      background: rgba(255, 193, 7, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .loading {
+      text-align: center;
+      color: #a4c6ff;
+      padding: 40px;
+      font-style: italic;
+    }
+    
+    .no-data {
+      text-align: center;
+      color: #aaa;
+      padding: 60px 20px;
+      font-style: italic;
+      background: rgba(255,255,255,0.02);
+      border-radius: 10px;
+      border: 1px dashed rgba(255,255,255,0.05);
+    }
+
+    .no-data a {
+      color: #6fb3d6;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* PROPERTIES SECTION */
     .properties-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -104,14 +303,6 @@
       padding: 18px;
     }
     
-    .property-title {
-      font-size: 1.15rem;
-      color: #eef6f6;
-      margin-bottom: 10px;
-      font-family: "Griffy", cursive;
-      line-height: 1.3;
-    }
-    
     .property-detail {
       color: #bfc8c9;
       margin: 8px 0;
@@ -155,77 +346,10 @@
       box-shadow: 0 16px 40px rgba(30,80,110,0.2);
     }
 
-    .cancel-btn {
-      padding: 10px 16px;
-      background: linear-gradient(180deg, #6b3a3a, #4a2424);
-      color: #ff9999;
-      border: 1px solid rgba(255, 107, 107, 0.2);
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: "Cinzel", serif;
-      font-weight: 700;
-      transition: all .18s ease;
-      box-shadow: 0 12px 30px rgba(200, 80, 80, 0.08);
-    }
-
-    .cancel-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(200, 80, 80, 0.16);
-      background: linear-gradient(180deg, #7d4444, #572d2d);
-    }
-    
-    /* BOOKING CARDS */
-    .booking-card {
-      background: linear-gradient(180deg, rgba(12,16,20,0.6), rgba(6,10,14,0.55));
-      padding: 20px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.02);
-      margin-bottom: 20px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
-    }
-    
-    .booking-status {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      margin-top: 10px;
-      font-weight: 600;
-    }
-    
-    .status-confirmed {
-      background: rgba(81, 207, 102, 0.2);
-      color: #51cf66;
-      border: 1px solid #51cf66;
-    }
-
-    .status-pending {
-      background: rgba(255, 193, 7, 0.2);
-      color: #ffc107;
-      border: 1px solid #ffc107;
-    }
-
-    .status-cancelled {
-      background: rgba(255, 107, 107, 0.2);
-      color: #ff6b6b;
-      border: 1px solid #ff6b6b;
-    }
-    
-    .loading {
-      text-align: center;
-      color: #a4c6ff;
-      padding: 40px;
-      font-style: italic;
-    }
-    
-    .no-data {
-      text-align: center;
-      color: #aaa;
-      padding: 60px 20px;
-      font-style: italic;
-      background: rgba(255,255,255,0.02);
-      border-radius: 10px;
-      border: 1px dashed rgba(255,255,255,0.05);
+    @media (max-width: 900px) {
+      .bookings-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -238,36 +362,36 @@
       <img src="logo.png" alt="Phantom Systems Logo">
     </div>
     <ul class="nav-links">
-      <li><a href="#" onclick="showSection('properties')">Explore Haunts</a></li>
       <li><a href="#" onclick="showSection('bookings')">My Bookings</a></li>
-      <li><a href="#">Support</a></li>
+      <li><a href="#" onclick="showSection('properties')">Explore Haunts</a></li>
+      <li><a href="contact.html">Contact Us</a></li>
       <li><a href="#" onclick="logout()">Logout</a></li>
     </ul>
   </nav>
 
   <main class="hero">
     <div class="hero-text">
-      <h2 class="welcome-text">WELCOME, MORTAL, TO:</h2>
+      <h2 class="welcome-text" id="welcomeText">WELCOME, MORTAL, TO:</h2>
       <h1 class="title">GHOST RENT</h1>
-      <p class="tagline">Your next haunted stay awaits. Choose wisely...</p>
-      <p class="byline">Browse ghostly estates, view your bookings, or reach out if the spirits misbehave.</p>
+      <p class="tagline">Your haunted journey continues...</p>
+      <p class="byline">Manage your bookings, explore new properties, or summon support if spirits misbehave.</p>
       
       <div class="buttons">
-        <button class="contact-btn" onclick="showSection('bookings')">View My Bookings</button>
+        <button class="contact-btn" onclick="showSection('bookings')">My Bookings</button>
         <button class="rent-btn" onclick="window.location.href='property-list.html'">Find Haunted Homes</button>
       </div>
 
       <div class="content-section">
         <!-- Bookings Section -->
-        <div id="bookings-section" style="display: none;">
-          <h3 class="section-title">📅 Your Haunted Bookings</h3>
+        <div id="bookings-section">
+          <h3 class="section-title">🎃 Your Haunted Bookings</h3>
           <div id="bookings-container">
             <div class="loading">Loading your spectral reservations...</div>
           </div>
         </div>
 
         <!-- Properties Section -->
-        <div id="properties-section">
+        <div id="properties-section" style="display: none;">
           <h3 class="section-title">🏚️ Available Haunted Properties</h3>
           <div id="properties-container">
             <div class="loading">Summoning available estates...</div>
@@ -278,7 +402,8 @@
   </main>
 
   <script>
-    let selectedProperty = null;
+    let userInfo = null;
+    const fallbackImage = 'https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80';
 
     async function checkAuth() {
       try {
@@ -291,10 +416,148 @@
           return;
         }
         
-        loadProperties();
+        userInfo = data.user;
+        document.getElementById('welcomeText').textContent = 
+          `WELCOME, ${userInfo.firstName.toUpperCase()}, TO:`;
+        
+        loadBookings();
       } catch (error) {
         console.error('Auth check failed:', error);
         window.location.href = 'loginpage.html';
+      }
+    }
+
+    async function loadBookings() {
+      try {
+        const response = await fetch('/api/bookings/detailed');
+        const data = await response.json();
+        
+        const container = document.getElementById('bookings-container');
+        
+        if (data.success && data.bookings.length > 0) {
+          container.innerHTML = `
+            <div class="bookings-grid">
+              ${data.bookings.map(booking => createBookingCard(booking)).join('')}
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="no-data">
+              👻 No bookings yet. <a onclick="showSection('properties')">Explore haunted properties</a> to make your first reservation!
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading bookings:', error);
+        document.getElementById('bookings-container').innerHTML = 
+          '<div class="no-data">⚰️ Failed to load bookings</div>';
+      }
+    }
+
+    function createBookingCard(booking) {
+      const statusClass = `status-${booking.status}`;
+      const statusText = booking.status === 'confirmed' ? '✅ Confirmed' : 
+                        booking.status === 'pending' ? '⏳ Pending' : 
+                        '❌ Cancelled';
+      
+      const checkInDate = new Date(booking.checkIn).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+      const checkOutDate = new Date(booking.checkOut).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+      
+      const canCancel = booking.status === 'confirmed';
+      const canReview = booking.status === 'confirmed' && new Date(booking.checkOut) < new Date();
+      
+      const propertyImage = booking.property?.image || fallbackImage;
+      const propertyTitle = booking.property?.title || 'Unknown Property';
+      const propertyLocation = booking.property?.location || 'Unknown Location';
+      const hauntingLevel = booking.property?.haunting_level || 'Unknown';
+      
+      return `
+        <div class="booking-card">
+          <div class="booking-image">
+            <img src="${propertyImage}" alt="${propertyTitle}" onerror="this.src='${fallbackImage}'">
+            <div class="booking-status-badge ${statusClass}">
+              ${statusText}
+            </div>
+          </div>
+          <div class="booking-body">
+            <div class="property-title">${propertyTitle}</div>
+            
+            <div class="booking-detail">
+              📍 ${propertyLocation}
+            </div>
+            
+            <div class="booking-detail">
+              👻 ${hauntingLevel} haunting
+            </div>
+            
+            <div class="booking-detail">
+              📅 <strong>Check-in:</strong> ${checkInDate}
+            </div>
+            
+            <div class="booking-detail">
+              📅 <strong>Check-out:</strong> ${checkOutDate}
+            </div>
+            
+            <div class="booking-detail">
+              🌙 <strong>Nights:</strong> ${booking.nights}
+            </div>
+            
+            <div class="booking-price">
+              💰 $${booking.totalPrice.toLocaleString()}
+            </div>
+            
+            <div class="booking-actions">
+              <button class="action-btn view-btn" onclick="viewProperty(${booking.propertyId})">
+                👁️ View Property
+              </button>
+              ${canReview ? `
+                <button class="action-btn review-btn" onclick="leaveReview(${booking.propertyId})">
+                  ⭐ Review
+                </button>
+              ` : ''}
+              ${canCancel ? `
+                <button class="action-btn cancel-btn" onclick="cancelBooking(${booking.id})">
+                  ❌ Cancel
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function viewProperty(propertyId) {
+      window.location.href = `property-detail.html?id=${propertyId}`;
+    }
+
+    function leaveReview(propertyId) {
+      window.location.href = `property-detail.html?id=${propertyId}#review`;
+    }
+
+    async function cancelBooking(bookingId) {
+      if (!confirm('⚠️ Are you sure you want to cancel this booking? This action cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
+          method: 'POST',
+          credentials: 'same-origin'
+        });
+        
+        const data = await response.json();
+        alert(data.message);
+        
+        if (data.success) {
+          loadBookings();
+        }
+      } catch (error) {
+        console.error('Error cancelling booking:', error);
+        alert('⚰️ Failed to cancel booking. Please try again.');
       }
     }
 
@@ -306,8 +569,6 @@
         const container = document.getElementById('properties-container');
         
         if (data.success && data.properties.length > 0) {
-          const fallbackImage = 'https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80';
-          
           container.innerHTML = `
             <div class="properties-grid">
               ${data.properties.map(prop => `
@@ -316,7 +577,7 @@
                     <img src="${prop.image || fallbackImage}" 
                          alt="${prop.title}"
                          onerror="this.src='${fallbackImage}'">
-                    <div class="property-badge">${prop.available ? '✓ Available' : '✗ Unavailable'}</div>
+                    <div class="property-badge">${prop.available ? '✔ Available' : '✗ Unavailable'}</div>
                   </div>
                   <div class="property-body">
                     <div class="property-title">${prop.title}</div>
@@ -324,7 +585,7 @@
                     <div class="property-detail">📍 ${prop.location}</div>
                     <div class="property-detail">🌙 ${prop.haunting_level} haunting</div>
                     <div class="property-footer">
-                      <div class="property-price">$${prop.price.toLocaleString()}/mo</div>
+                      <div class="property-price">$${prop.price.toLocaleString()}/day</div>
                       <button class="book-btn" onclick="viewProperty(${prop.id})">
                         View Details
                       </button>
@@ -341,69 +602,6 @@
         console.error('Error loading properties:', error);
         document.getElementById('properties-container').innerHTML = 
           '<div class="no-data">⚰️ Failed to load properties</div>';
-      }
-    }
-
-    function viewProperty(propertyId) {
-      window.location.href = `property-detail.html?id=${propertyId}`;
-    }
-
-    async function loadBookings() {
-      try {
-        const response = await fetch('/api/bookings');
-        const data = await response.json();
-        
-        const container = document.getElementById('bookings-container');
-        
-        if (data.success && data.bookings.length > 0) {
-          container.innerHTML = data.bookings.map(booking => `
-            <div class="booking-card">
-              <div class="property-title">${booking.propertyTitle}</div>
-              <div class="property-detail">📍 ${booking.propertyLocation}</div>
-              <div class="property-detail">📅 Check-in: ${new Date(booking.checkIn).toLocaleDateString()}</div>
-              <div class="property-detail">📅 Check-out: ${new Date(booking.checkOut).toLocaleDateString()}</div>
-              <div class="property-detail">💰 Total: $${booking.totalPrice.toLocaleString()}</div>
-              <div class="property-detail">
-                🗓️ Booked: ${new Date(booking.createdAt).toLocaleDateString()}
-              </div>
-              <span class="booking-status status-${booking.status}">
-                ${booking.status === 'confirmed' ? '✅' : booking.status === 'pending' ? '⏳' : '❌'} 
-                ${booking.status.toUpperCase()}
-              </span>
-            </div>
-          `).join('');
-        } else {
-          container.innerHTML = '<div class="no-data">👻 No bookings yet. Explore haunted properties to make your first reservation!</div>';
-        }
-      } catch (error) {
-        console.error('Error loading bookings:', error);
-        document.getElementById('bookings-container').innerHTML = 
-          '<div class="no-data">⚰️ Failed to load bookings</div>';
-      }
-    }
-
-    async function cancelBooking(bookingId, propertyTitle) {
-      if (!confirm(`Are you sure you want to cancel your booking for ${propertyTitle}?`)) {
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/bookings/${bookingId}`, {
-          method: 'DELETE',
-          credentials: 'same-origin'
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          alert('✅ ' + data.message);
-          loadBookings(); // Refresh bookings list
-        } else {
-          alert('⚰️ ' + data.message);
-        }
-      } catch (error) {
-        console.error('Cancel booking error:', error);
-        alert('⚰️ Failed to cancel booking');
       }
     }
     

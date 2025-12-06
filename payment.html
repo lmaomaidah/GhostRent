@@ -731,8 +731,8 @@ body {
 </div>
 
 <!-- SUCCESS MODAL -->
-<div class="modal" id="successModal">
-  <div class="modal-content" id="modalContent">
+<div class="modal" id="successModal" onclick="closeModal()">
+  <div class="modal-content" id="modalContent" onclick="event.stopPropagation()">
     <div class="success-icon" id="modalIcon">🎃</div>
     <h2 class="modal-title" id="modalTitle">Payment Successful!</h2>
     <p class="modal-text" id="modalMessage">
