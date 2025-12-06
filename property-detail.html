@@ -1,1222 +1,667 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GhostRent – Property Details</title>
-  <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&family=Griffy&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ghost Rent – Property Details</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Griffy&family=Cinzel:wght@400;700&family=Henny+Penny&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg-midnight: #0a0f1a;
-      --bg-deep: #0d1b2a;
-      --bg-indigo: #102542;
-      --bg-ink: #1b263b;
-      --muted: #c3c8cc;
-      --accent: #6fb3d6;
+      --bg: #0E1A2F;
+      --panel: rgba(28,30,36,0.85);
+      --muted: #AEBBCC;
+      --text: #E8EBF2;
+      --accent: #9DD9FF;
+      --glass: rgba(255,255,255,0.04);
+      --card-shadow: 0 10px 30px rgba(2,6,12,0.6);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
     
     body {
-      font-family: 'Cinzel', serif;
-      background: linear-gradient(150deg, var(--bg-midnight), var(--bg-deep), var(--bg-indigo), var(--bg-ink));
-      color: var(--muted);
+      font-family: "Cinzel", serif;
+      background: url('haunted-bg.jpg') no-repeat center center/cover;
+      background-attachment: fixed;
+      color: var(--text);
       min-height: 100vh;
-      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    .page-bg {
-      background:
-        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 5%),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.01), transparent 8%);
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      filter: blur(1px);
-    }
-    
     .overlay {
       position: fixed;
       inset: 0;
-      background: linear-gradient(90deg, rgba(3,6,12,0.35), rgba(2,4,8,0.55));
+      background: rgba(6,10,16,0.55);
       z-index: 0;
+      pointer-events: none;
     }
 
-    .container {
-      width: 92%;
-      max-width: 1200px;
-      margin: 0 auto;
+    /* NAVBAR */
+    .navbar {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 80px;
+    }
+
+    .logo img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 40px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #cdd9ff;
+      font-family: "Griffy";
+      font-size: 1.1rem;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #a4c6ff;
+      text-shadow: 0 0 8px rgba(150,200,255,0.7);
+    }
+
+    /* MAIN CONTENT */
+    .content-wrapper {
       position: relative;
       z-index: 2;
-      padding-top: 20px;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .property-container {
+      background: linear-gradient(180deg, rgba(12,16,20,0.7), rgba(8,10,14,0.6));
+      border-radius: 14px;
+      padding: 30px;
+      border: 1px solid var(--glass);
+      box-shadow: var(--card-shadow);
     }
 
     /* HEADER */
-    header {
-      padding: 12px 0 20px 0;
-    }
-    
-    header .container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .property-header {
+      margin-bottom: 30px;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .logo {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid rgba(255,255,255,0.06);
-    }
-    
-    .site-name {
-      font-family: 'Griffy', cursive;
-      color: #e8f6fb;
-      font-size: 1.2rem;
-      letter-spacing: 2px;
-    }
-
-    .nav a {
-      margin-left: 18px;
-      color: var(--muted);
-      text-decoration: none;
-      padding: 8px 14px;
-      border-radius: 22px;
-      transition: .2s;
-      font-weight: 600;
-    }
-    
-    .nav a:hover {
-      background: rgba(255,255,255,0.02);
-      color: #fff;
-      transform: translateY(-2px);
-    }
-
-    /* BACK BUTTON */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #6fb3d6;
-      text-decoration: none;
-      margin-bottom: 20px;
-      font-size: 0.95rem;
-      transition: transform 0.2s;
-    }
-    
-    .back-link:hover {
-      transform: translateX(-4px);
-    }
-
-    /* HEADER */
-    .detail-header {
-      margin-top: 10px;
-      text-align: center;
-    }
-    
-    .detail-title {
-      font-family: 'Henny Penny', cursive;
-      font-size: 2.4rem;
-      color: #e8f6fb;
-      text-shadow: 0 0 12px rgba(120,190,220,0.1);
+    .property-title {
+      font-family: "Griffy", cursive;
+      font-size: 2.5rem;
+      color: #eef6f6;
       margin-bottom: 12px;
-    }
-    
-    .detail-location {
-      font-size: 1.1rem;
-      color: #bfc8c9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
+      letter-spacing: 1px;
     }
 
-    /* GALLERY */
-    .gallery {
-      margin-top: 30px;
+    .property-meta {
       display: flex;
       gap: 20px;
       flex-wrap: wrap;
-      justify-content: center;
+      color: var(--muted);
+      font-size: 0.95rem;
     }
-    
-    .gallery img {
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* IMAGE GALLERY */
+    .image-gallery {
+      margin-bottom: 30px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .main-image {
       width: 100%;
-      max-width: 800px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.04);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      height: 500px;
       object-fit: cover;
-      max-height: 500px;
+      display: block;
+      filter: brightness(0.85) contrast(1.02);
     }
 
-    /* CONTENT LAYOUT */
-    .content-wrapper {
+    /* CONTENT GRID */
+    .content-grid {
       display: grid;
-      grid-template-columns: 1fr 350px;
+      grid-template-columns: 2fr 1fr;
       gap: 30px;
-      margin-top: 30px;
+      margin-bottom: 30px;
     }
 
-    /* DETAILS BOX */
-    .detail-box {
-      background: linear-gradient(180deg, rgba(12,16,20,0.6), rgba(6,10,14,0.55));
+    /* LEFT COLUMN */
+    .property-details {
+      background: rgba(255,255,255,0.015);
+      padding: 25px;
+      border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.02);
-      padding: 28px;
-      border-radius: 14px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
-      backdrop-filter: blur(4px);
-      margin-bottom: 20px;
     }
 
-    .detail-box h2 {
-      font-family: 'Griffy', cursive;
-      font-size: 1.6rem;
-      margin-bottom: 16px;
-      color: #eef6f6;
+    .section-title {
+      font-family: "Henny Penny", cursive;
+      font-size: 1.5rem;
+      color: #cbd8ff;
+      margin-bottom: 15px;
     }
 
-    .detail-box p {
-      line-height: 1.7;
-      margin-bottom: 16px;
+    .description {
       color: #bfc8c9;
-      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 25px;
     }
 
-    /* INFO GRID */
-    .info-grid {
+    .features-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
       margin-top: 20px;
     }
 
-    .info-item {
-      background: rgba(255,255,255,0.03);
-      padding: 16px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.04);
-      text-align: center;
-    }
-
-    .info-label {
-      color: #9fb1bb;
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-    }
-    
-    .info-value {
-      color: #e7faff;
-      font-weight: 700;
-      font-size: 1.2rem;
-    }
-
-    /* RATINGS SUMMARY */
-    .ratings-summary {
-      background: rgba(255,255,255,0.03);
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.04);
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .ratings-summary:hover {
-      background: rgba(255,255,255,0.05);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(111,179,214,0.2);
-    }
-
-    .rating-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .rating-score {
+    .feature-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-
-    .rating-number {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #51cf66;
-      font-family: 'Griffy', cursive;
-    }
-
-    .rating-stars {
-      font-size: 1.5rem;
-      color: #ffd43b;
-    }
-
-    .rating-count {
-      color: #9fb1bb;
-      font-size: 0.9rem;
-    }
-
-    .view-all-btn {
-      padding: 8px 16px;
-      background: rgba(111,179,214,0.1);
-      border: 1px solid rgba(111,179,214,0.3);
-      color: #6fb3d6;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Cinzel', serif;
-      font-size: 0.9rem;
-      transition: 0.2s;
-    }
-
-    .view-all-btn:hover {
-      background: rgba(111,179,214,0.2);
-    }
-
-    .recent-reviews {
-      margin-top: 16px;
-    }
-
-    .review-preview {
-      background: rgba(0,0,0,0.2);
+      gap: 10px;
       padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      border-left: 3px solid rgba(111,179,214,0.4);
-    }
-
-    .review-preview:last-child {
-      margin-bottom: 0;
-    }
-
-    .review-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .reviewer-name {
-      font-weight: 600;
-      color: #e7faff;
-      font-size: 0.95rem;
-    }
-
-    .review-stars {
-      color: #ffd43b;
-      font-size: 0.9rem;
-    }
-
-    .review-text {
-      color: #bfc8c9;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-
-    .review-date {
-      color: #8f9a9a;
-      font-size: 0.8rem;
-      margin-top: 6px;
-    }
-
-    /* REVIEW MODAL */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      backdrop-filter: blur(3px);
-      animation: fadeIn 0.3s ease;
-    }
-
-    .modal.show {
-      display: flex;
-    }
-
-    .modal-content {
-      background: linear-gradient(180deg, rgba(12,16,20,0.95), rgba(6,10,14,0.95));
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
-      padding: 30px;
-      max-width: 700px;
-      width: 90%;
-      max-height: 85vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
-      position: relative;
-      animation: slideUp 0.4s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .modal-title {
-      font-family: 'Henny Penny', cursive;
-      font-size: 1.8rem;
-      color: #e8f6fb;
-      text-shadow: 0 0 15px rgba(120,190,220,0.3);
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      color: #9fb1bb;
-      font-size: 2rem;
-      cursor: pointer;
-      transition: 0.2s;
-      line-height: 1;
-    }
-
-    .close-modal:hover {
-      color: #e7faff;
-      transform: rotate(90deg);
-    }
-
-    .modal-rating-summary {
-      background: rgba(255,255,255,0.03);
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .modal-rating-number {
-      font-size: 3rem;
-      font-weight: 700;
-      color: #51cf66;
-      font-family: 'Griffy', cursive;
-      margin-bottom: 8px;
-    }
-
-    .modal-rating-stars {
-      font-size: 2rem;
-      color: #ffd43b;
-      margin-bottom: 8px;
-    }
-
-    .modal-rating-count {
-      color: #9fb1bb;
-      font-size: 1rem;
-    }
-
-    /* LEAVE REVIEW FORM */
-    .leave-review-section {
-      background: rgba(111,179,214,0.05);
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid rgba(111,179,214,0.2);
-      margin-bottom: 24px;
-    }
-
-    .leave-review-section h3 {
-      font-family: 'Griffy', cursive;
-      color: #eef6f6;
-      margin-bottom: 16px;
-      font-size: 1.3rem;
-    }
-
-    .star-rating {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      justify-content: center;
-    }
-
-    .star {
-      font-size: 2rem;
-      cursor: pointer;
-      color: #4a5568;
-      transition: 0.2s;
-    }
-
-    .star:hover,
-    .star.active {
-      color: #ffd43b;
-      transform: scale(1.1);
-    }
-
-    .review-textarea {
-      width: 100%;
-      padding: 12px;
-      background: rgba(4,8,12,0.55);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      color: #e7faff;
-      font-family: 'Cinzel', serif;
-      resize: vertical;
-      min-height: 100px;
-      margin-bottom: 12px;
-    }
-
-    .review-textarea:focus {
-      outline: none;
-      border-color: rgba(111,179,214,0.4);
-    }
-
-    .submit-review-btn {
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(180deg, #143b55, #0c2b40);
-      border: 1px solid rgba(120,200,240,0.06);
-      color: #e7fbff;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      transition: 0.2s;
-    }
-
-    .submit-review-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(30,80,110,0.3);
-    }
-
-    .submit-review-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* ALL REVIEWS */
-    .all-reviews {
-      margin-top: 24px;
-    }
-
-    .all-reviews h3 {
-      font-family: 'Griffy', cursive;
-      color: #eef6f6;
-      margin-bottom: 16px;
-      font-size: 1.3rem;
-    }
-
-    .review-item {
       background: rgba(255,255,255,0.02);
-      padding: 16px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.05);
-      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.03);
     }
 
-    .review-item:last-child {
-      margin-bottom: 0;
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    /* BOOKING BOX */
-    .booking {
-      background: linear-gradient(180deg, rgba(12,16,20,0.6), rgba(6,10,14,0.55));
-      padding: 24px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.02);
-      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
-      backdrop-filter: blur(4px);
+    /* RIGHT COLUMN - BOOKING CARD */
+    .booking-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid var(--glass);
+      box-shadow: var(--card-shadow);
       position: sticky;
       top: 20px;
+      height: fit-content;
     }
 
-    .price-big {
-      font-size: 2.2rem;
+    .price-display {
+      font-size: 2rem;
       font-weight: 700;
-      color: #dbeff6;
+      color: var(--accent);
       margin-bottom: 8px;
-      text-align: center;
     }
 
     .price-label {
-      text-align: center;
-      color: #9fb1bb;
+      color: var(--muted);
       font-size: 0.9rem;
       margin-bottom: 20px;
     }
 
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      color: #bfc8c9;
-      margin-bottom: 8px;
-      font-size: 0.9rem;
-    }
-
-    .form-group input {
-      width: 100%;
+    .availability-status {
       padding: 12px;
-      background: rgba(4,8,12,0.55);
-      border: 1px solid rgba(255,255,255,0.04);
       border-radius: 8px;
-      color: #e7faff;
-      font-family: 'Cinzel', serif;
-      outline: none;
-    }
-
-    .form-group input:focus {
-      border-color: rgba(120,200,240,0.2);
-    }
-
-    .ghost-btn {
-      width: 100%;
-      padding: 14px 20px;
-      font-size: 1.05rem;
-      background: linear-gradient(180deg, #143b55, #0c2b40);
-      border: 1px solid rgba(120,200,240,0.06);
-      color: #e7fbff;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: .18s;
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      box-shadow: 0 12px 30px rgba(30,80,110,0.12);
-    }
-    
-    .ghost-btn:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(30,80,110,0.2);
-    }
-
-    .ghost-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .total-price {
+      margin-bottom: 20px;
       text-align: center;
+      font-weight: 600;
+    }
+
+    .available {
+      background: rgba(81, 207, 102, 0.2);
       color: #51cf66;
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin: 16px 0;
-      padding: 12px;
-      background: rgba(81,207,102,0.05);
+      border: 1px solid #51cf66;
+    }
+
+    .unavailable {
+      background: rgba(255, 107, 107, 0.2);
+      color: #ff6b6b;
+      border: 1px solid #ff6b6b;
+    }
+
+    .booking-info {
+      background: rgba(255,255,255,0.02);
+      padding: 15px;
       border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      color: var(--muted);
+    }
+
+    .info-row strong {
+      color: var(--text);
+    }
+
+    .book-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #0b1724;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: "Cinzel", serif;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+      box-shadow: 0 10px 30px rgba(15,30,50,0.25);
+    }
+
+    .book-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(15,30,50,0.35);
+    }
+
+    .book-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #555;
+    }
+
+    .contact-host {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.02);
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: "Cinzel", serif;
+      transition: all 0.2s;
+      margin-top: 10px;
+    }
+
+    .contact-host:hover {
+      background: rgba(255,255,255,0.04);
+      transform: translateY(-2px);
     }
 
     /* HOST INFO */
-    .host-info {
-      background: rgba(255,255,255,0.02);
+    .host-section {
+      margin-top: 30px;
       padding: 20px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.015);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.02);
     }
 
-    .host-info h3 {
-      font-family: 'Griffy', cursive;
-      color: #eef6f6;
-      margin-bottom: 12px;
+    .host-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .host-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      font-weight: 700;
+    }
+
+    .host-details h3 {
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .host-details p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* LOADING */
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: var(--accent);
       font-size: 1.2rem;
     }
 
-    .host-info p {
-      color: #bfc8c9;
-      line-height: 1.6;
-    }
-
-    footer {
+    .error {
       text-align: center;
-      padding: 30px 0;
-      margin-top: 60px;
-      color: #8f9a9a;
-      font-size: 0.95rem;
-      border-top: 1px solid rgba(255,255,255,0.03);
+      padding: 60px;
+      color: #ff6b6b;
     }
 
     /* RESPONSIVE */
     @media (max-width: 900px) {
-      .content-wrapper {
-        grid-template-columns: 1fr;
-      }
-      
-      .booking {
-        position: static;
-      }
-      
-      .detail-title {
-        font-size: 1.8rem;
-      }
-      
-      .info-grid {
+      .content-grid {
         grid-template-columns: 1fr;
       }
 
-      .modal-content {
-        width: 95%;
+      .booking-card {
+        position: relative;
+        top: 0;
+      }
+
+      .navbar {
         padding: 20px;
+      }
+
+      .property-title {
+        font-size: 2rem;
+      }
+
+      .main-image {
+        height: 300px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="page-bg"></div>
   <div class="overlay"></div>
 
-  <header>
-    <div class="container">
-      <div class="brand">
-        <img src="logo.png" class="logo" alt="GhostRent Logo">
-        <span class="site-name">GhostRent</span>
-      </div>
-
-      <nav class="nav">
-        <a href="index.html">Home</a>
-        <a href="property-list.html">Haunted Estates</a>
-        <a href="index.html">Register</a>
-        <a href="loginpage.html">Log In</a>
-      </nav>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="logo">
+      <img src="logo.png" alt="Ghost Rent Logo">
     </div>
-  </header>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="property-list.html">Browse</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="#" onclick="logout()">Logout</a></li>
+    </ul>
+  </nav>
 
-  <main class="container">
-    <a href="property-list.html" class="back-link">← Back to Listings</a>
-
-    <div class="detail-header">
-      <h1 class="detail-title" id="propertyTitle">Loading...</h1>
-      <div class="detail-location" id="propertyLocation">
-        <span>📍 Location</span>
-        <span>•</span>
-        <span>👻 Haunting Level</span>
-      </div>
+  <!-- MAIN CONTENT -->
+  <div class="content-wrapper">
+    <div id="loadingContainer" class="loading">
+      Loading haunted property details...
     </div>
 
-    <div class="gallery" id="propertyGallery">
-      <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1500&q=80" alt="Property Image" id="propertyImage">
-    </div>
-
-    <div class="content-wrapper">
-      <div>
-        <section class="detail-box">
-          <h2>About This Property</h2>
-          <p id="propertyDescription">
-            Loading property details...
-          </p>
-
-          <div class="info-grid" id="propertyInfoGrid">
-            <!-- Info items will be injected here -->
+    <div id="propertyContainer" style="display: none;">
+      <div class="property-container">
+        <!-- HEADER -->
+        <div class="property-header">
+          <h1 class="property-title" id="propertyTitle">The Withering Manor</h1>
+          <div class="property-meta">
+            <div class="meta-item">
+              <span>📍</span>
+              <span id="propertyLocation">Unknown Location</span>
+            </div>
+            <div class="meta-item">
+              <span>👻</span>
+              <span id="propertyHaunting">Unknown Haunting</span>
+            </div>
+            <div class="meta-item">
+              <span>🏚️</span>
+              <span id="propertyType">Manor</span>
+            </div>
           </div>
-        </section>
+        </div>
 
-        <!-- RATINGS & REVIEWS SECTION -->
-        <section class="detail-box">
-          <h2>Ratings & Reviews</h2>
-          <div class="ratings-summary" id="ratingsSummary" onclick="openReviewModal()">
-            <div class="rating-header">
-              <div class="rating-score">
-                <div class="rating-number" id="avgRating">4.8</div>
-                <div>
-                  <div class="rating-stars" id="avgStars">★★★★★</div>
-                  <div class="rating-count" id="reviewCount">12 reviews</div>
+        <!-- IMAGE -->
+        <div class="image-gallery">
+          <img 
+            id="propertyImage" 
+            class="main-image" 
+            src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80" 
+            alt="Property"
+          >
+        </div>
+
+        <!-- CONTENT GRID -->
+        <div class="content-grid">
+          <!-- LEFT: DETAILS -->
+          <div class="property-details">
+            <h2 class="section-title">About This Haunted Estate</h2>
+            <p class="description" id="propertyDescription">
+              Loading description...
+            </p>
+
+            <h3 class="section-title" style="margin-top: 30px;">Property Features</h3>
+            <div class="features-grid">
+              <div class="feature-item">
+                <span>🌙</span>
+                <span>Nightly Apparitions</span>
+              </div>
+              <div class="feature-item">
+                <span>❄️</span>
+                <span>Cold Spots</span>
+              </div>
+              <div class="feature-item">
+                <span>🔮</span>
+                <span>Séance Room</span>
+              </div>
+              <div class="feature-item">
+                <span>🕯️</span>
+                <span>Candlelit Halls</span>
+              </div>
+              <div class="feature-item">
+                <span>📚</span>
+                <span>Cursed Library</span>
+              </div>
+              <div class="feature-item">
+                <span>⚰️</span>
+                <span>Ancient Crypt</span>
+              </div>
+            </div>
+
+            <!-- HOST SECTION -->
+            <div class="host-section">
+              <h3 class="section-title">Your Host</h3>
+              <div class="host-info">
+                <div class="host-avatar" id="hostAvatar">H</div>
+                <div class="host-details">
+                  <h3 id="hostName">Loading...</h3>
+                  <p id="hostRole">Property Lister</p>
                 </div>
               </div>
-              <button class="view-all-btn">View All</button>
-            </div>
-            
-            <div class="recent-reviews" id="recentReviews">
-              <!-- Recent reviews will be injected here -->
             </div>
           </div>
-        </section>
-      </div>
 
-      <aside class="sidebar">
-        <div class="booking" id="bookingBox">
-          <div class="price-big" id="propertyPrice">$0</div>
-          <div class="price-label">per day</div>
-          
-          <form id="bookingForm">
-            <div class="form-group">
-              <label for="checkIn">📅 Check-in Date</label>
-              <input type="date" id="checkIn" required>
+          <!-- RIGHT: BOOKING CARD -->
+          <div class="booking-card">
+            <div class="price-display" id="propertyPrice">$0</div>
+            <div class="price-label">per night</div>
+
+            <div class="availability-status available" id="availabilityStatus">
+              ✓ Available for Booking
             </div>
 
-            <div class="form-group">
-              <label for="checkOut">📅 Check-out Date</label>
-              <input type="date" id="checkOut" required>
+            <div class="booking-info">
+              <div class="info-row">
+                <span>Haunting Level:</span>
+                <strong id="hauntingLevel">—</strong>
+              </div>
+              <div class="info-row">
+                <span>Property Type:</span>
+                <strong id="propertyTypeInfo">—</strong>
+              </div>
+              <div class="info-row">
+                <span>Location:</span>
+                <strong id="locationInfo">—</strong>
+              </div>
             </div>
 
-            <div class="total-price" id="totalPrice" style="display: none;">
-              Total: $0
-            </div>
-
-            <button type="submit" class="ghost-btn" id="bookBtn">
-              👻 Book This Haunt
+            <button class="book-btn" id="bookNowBtn" onclick="proceedToBooking()">
+              Book This Haunt
             </button>
-          </form>
-        </div>
 
-        <div class="host-info" id="hostInfo">
-          <h3>👤 Your Host</h3>
-          <p id="hostName">Unknown Host</p>
+            <button class="contact-host" onclick="contactHost()">
+              Contact Host
+            </button>
+          </div>
         </div>
-      </aside>
+      </div>
     </div>
-  </main>
 
-  <!-- REVIEW MODAL -->
-  <div class="modal" id="reviewModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title">Reviews & Ratings</h2>
-        <button class="close-modal" onclick="closeReviewModal()">&times;</button>
-      </div>
-
-      <div class="modal-rating-summary">
-        <div class="modal-rating-number" id="modalAvgRating">4.8</div>
-        <div class="modal-rating-stars" id="modalAvgStars">★★★★★</div>
-        <div class="modal-rating-count" id="modalReviewCount">Based on 12 reviews</div>
-      </div>
-
-      <!-- LEAVE A REVIEW -->
-      <div class="leave-review-section" id="leaveReviewSection">
-        <h3>Leave a Review</h3>
-        <div class="star-rating" id="starRating">
-          <span class="star" data-rating="1">★</span>
-          <span class="star" data-rating="2">★</span>
-          <span class="star" data-rating="3">★</span>
-          <span class="star" data-rating="4">★</span>
-          <span class="star" data-rating="5">★</span>
-        </div>
-        <textarea 
-          class="review-textarea" 
-          id="reviewText" 
-          placeholder="Share your haunting experience..."
-          maxlength="500"
-        ></textarea>
-        <button class="submit-review-btn" onclick="submitReview()">Submit Review</button>
-      </div>
-
-      <!-- ALL REVIEWS -->
-      <div class="all-reviews">
-        <h3>All Reviews</h3>
-        <div id="allReviewsList">
-          <!-- Reviews will be injected here -->
+    <div id="errorContainer" style="display: none;">
+      <div class="property-container">
+        <div class="error">
+          <h2>👻 Property Not Found</h2>
+          <p style="margin-top: 15px;">This haunted estate has vanished into the mist.</p>
+          <p style="margin-top: 10px;">
+            <a href="property-list.html" style="color: var(--accent); text-decoration: underline;">
+              Browse other properties
+            </a>
+          </p>
         </div>
       </div>
     </div>
   </div>
 
-  <footer>
-    © Phantom Systems – GhostRent. Enter at your own risk.
-  </footer>
-
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const propertyId = urlParams.get('id');
-
-    if (!propertyId) {
-      alert('No property specified!');
-      window.location.href = 'property-list.html';
-    }
-
+    const fallbackImage = 'https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80';
     let currentProperty = null;
-    let userRole = null;
-    let selectedRating = 0;
-    let reviews = [];
 
-    async function checkAuth() {
-      try {
-        const res = await fetch('/api/auth/status', {
-          credentials: 'same-origin'
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.user) {
-            userRole = data.user.role;
-          }
-        }
-      } catch (err) {
-        console.log('Not authenticated');
-      }
+    // Get property ID from URL
+    function getPropertyId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
     }
 
-    async function loadPropertyDetails() {
+    // Format price
+    function formatPrice(price) {
+      return '$' + Number(price).toLocaleString();
+    }
+
+    // Load property details
+    async function loadProperty() {
+      const propertyId = getPropertyId();
+      
+      if (!propertyId) {
+        showError();
+        return;
+      }
+
       try {
-        const res = await fetch(`/api/properties/${propertyId}`, {
-          credentials: 'same-origin'
-        });
-        
-        if (!res.ok) {
-          throw new Error('Property not found');
+        const response = await fetch(`/api/properties/${propertyId}`);
+        const data = await response.json();
+
+        if (!data.success || !data.property) {
+          showError();
+          return;
         }
-        
-        const data = await res.json();
-        if (!data.success) {
-          throw new Error(data.message);
-        }
-        
+
         currentProperty = data.property;
         displayProperty(currentProperty);
-        await loadReviews();
-        
+
       } catch (error) {
         console.error('Error loading property:', error);
-        alert('Failed to load property details');
-        window.location.href = 'property-list.html';
+        showError();
       }
     }
 
-    async function loadReviews() {
-      try {
-        const res = await fetch(`/api/properties/${propertyId}/reviews`, {
-          credentials: 'same-origin'
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) {
-            reviews = data.reviews || [];
-            displayReviews();
-          }
-        }
-      } catch (error) {
-        console.error('Error loading reviews:', error);
-        // Use mock data if API fails
-        reviews = generateMockReviews();
-        displayReviews();
-      }
-    }
-
-    function generateMockReviews() {
-      return [
-        {
-          id: 1,
-          rating: 5,
-          text: "Absolutely terrifying experience! The ghosts were very accommodating and the atmosphere was perfectly eerie. Would haunt again!",
-          userName: "Emily R.",
-          date: "2024-11-15"
-        },
-        {
-          id: 2,
-          rating: 4,
-          text: "Great property with authentic paranormal activity. Lost one star because the chains rattling at 3 AM was a bit too frequent.",
-          userName: "Marcus T.",
-          date: "2024-11-10"
-        },
-        {
-          id: 3,
-          rating: 5,
-          text: "Best haunted mansion I've stayed at! The cold spots were refreshing and the spectral apparitions were top-notch.",
-          userName: "Sarah K.",
-          date: "2024-11-05"
-        }
-      ];
-    }
-
-    function displayReviews() {
-      if (reviews.length === 0) {
-        reviews = generateMockReviews();
-      }
-
-      const avgRating = (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
-      const reviewCount = reviews.length;
-      const stars = '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating));
-
-      // Update summary
-      document.getElementById('avgRating').textContent = avgRating;
-      document.getElementById('avgStars').textContent = stars;
-      document.getElementById('reviewCount').textContent = `${reviewCount} review${reviewCount !== 1 ? 's' : ''}`;
-
-      // Update modal
-      document.getElementById('modalAvgRating').textContent = avgRating;
-      document.getElementById('modalAvgStars').textContent = stars;
-      document.getElementById('modalReviewCount').textContent = `Based on ${reviewCount} review${reviewCount !== 1 ? 's' : ''}`;
-
-      // Show recent reviews (top 2)
-      const recentReviewsHtml = reviews.slice(0, 2).map(review => `
-        <div class="review-preview">
-          <div class="review-header">
-            <span class="reviewer-name">${review.userName}</span>
-            <span class="review-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
-          </div>
-          <div class="review-text">${review.text.substring(0, 100)}${review.text.length > 100 ? '...' : ''}</div>
-          <div class="review-date">${new Date(review.date).toLocaleDateString()}</div>
-        </div>
-      `).join('');
-
-      document.getElementById('recentReviews').innerHTML = recentReviewsHtml;
-
-      // Show all reviews in modal
-      const allReviewsHtml = reviews.map(review => `
-        <div class="review-item">
-          <div class="review-header">
-            <span class="reviewer-name">${review.userName}</span>
-            <span class="review-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
-          </div>
-          <div class="review-text">${review.text}</div>
-          <div class="review-date">${new Date(review.date).toLocaleDateString()}</div>
-        </div>
-      `).join('');
-
-      document.getElementById('allReviewsList').innerHTML = allReviewsHtml || '<p style="color: #9fb1bb; text-align: center;">No reviews yet. Be the first to review!</p>';
-    }
-
-    function openReviewModal() {
-      document.getElementById('reviewModal').classList.add('show');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeReviewModal() {
-      document.getElementById('reviewModal').classList.remove('show');
-      document.body.style.overflow = 'auto';
-    }
-
-    // Star rating interaction
-    document.querySelectorAll('.star').forEach(star => {
-      star.addEventListener('click', function() {
-        selectedRating = parseInt(this.dataset.rating);
-        document.querySelectorAll('.star').forEach((s, index) => {
-          if (index < selectedRating) {
-            s.classList.add('active');
-          } else {
-            s.classList.remove('active');
-          }
-        });
-      });
-
-      star.addEventListener('mouseenter', function() {
-        const rating = parseInt(this.dataset.rating);
-        document.querySelectorAll('.star').forEach((s, index) => {
-          if (index < rating) {
-            s.style.color = '#ffd43b';
-          } else {
-            s.style.color = '#4a5568';
-          }
-        });
-      });
-    });
-
-    document.getElementById('starRating').addEventListener('mouseleave', function() {
-      document.querySelectorAll('.star').forEach((s, index) => {
-        if (index < selectedRating) {
-          s.style.color = '#ffd43b';
-        } else {
-          s.style.color = '#4a5568';
-        }
-      });
-    });
-
-    async function submitReview() {
-      if (!userRole) {
-        alert('⚠️ Please log in to leave a review.');
-        return;
-      }
-
-      if (selectedRating === 0) {
-        alert('⚠️ Please select a star rating.');
-        return;
-      }
-
-      const reviewText = document.getElementById('reviewText').value.trim();
-      if (!reviewText) {
-        alert('⚠️ Please write a review.');
-        return;
-      }
-
-      try {
-        const res = await fetch(`/api/properties/${propertyId}/reviews`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify({
-            rating: selectedRating,
-            text: reviewText
-          })
-        });
-
-        const data = await res.json();
-        
-        if (data.success) {
-          alert('✨ Review submitted successfully!');
-          selectedRating = 0;
-          document.getElementById('reviewText').value = '';
-          document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
-          await loadReviews();
-        } else {
-          alert('❌ ' + (data.message || 'Failed to submit review'));
-        }
-      } catch (error) {
-        console.error('Error submitting review:', error);
-        alert('⚠️ Failed to submit review. Please try again.');
-      }
-    }
-
+    // Display property details
     function displayProperty(property) {
+      // Update title and meta
       document.getElementById('propertyTitle').textContent = property.title;
+      document.getElementById('propertyLocation').textContent = property.location;
+      document.getElementById('propertyHaunting').textContent = `${property.haunting_level} haunting`;
+      document.getElementById('propertyType').textContent = property.title.includes('Manor') ? 'Manor' : 
+                                                            property.title.includes('Cottage') ? 'Cottage' :
+                                                            property.title.includes('Mansion') ? 'Mansion' : 'Estate';
+
+      // Update image
+      const img = document.getElementById('propertyImage');
+      img.src = property.image || fallbackImage;
+      img.onerror = () => { img.src = fallbackImage; };
+      img.alt = property.title;
+
+      // Update description
+      document.getElementById('propertyDescription').textContent = property.description;
+
+      // Update price
+      document.getElementById('propertyPrice').textContent = formatPrice(property.price);
+
+      // Update booking card info
+      document.getElementById('hauntingLevel').textContent = property.haunting_level;
+      document.getElementById('propertyTypeInfo').textContent = property.title.includes('Manor') ? 'Manor' : 'Estate';
+      document.getElementById('locationInfo').textContent = property.location;
+
+      // Update availability
+      const availStatus = document.getElementById('availabilityStatus');
+      const bookBtn = document.getElementById('bookNowBtn');
       
-      document.getElementById('propertyLocation').innerHTML = `
-        <span>📍 ${property.location || 'Unknown'}</span>
-        <span>•</span>
-        <span>👻 ${property.haunting_level || 'Unknown'} haunting</span>
-      `;
-      
-      document.getElementById('propertyDescription').textContent = 
-        property.description || 'No description available.';
-      
-      const priceFormatted = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: 0
-      }).format(property.price || 0);
-      
-      document.getElementById('propertyPrice').textContent = priceFormatted;
-      
-      if (property.image) {
-        document.getElementById('propertyImage').src = property.image;
+      if (property.available) {
+        availStatus.className = 'availability-status available';
+        availStatus.innerHTML = '✓ Available for Booking';
+        bookBtn.disabled = false;
+      } else {
+        availStatus.className = 'availability-status unavailable';
+        availStatus.innerHTML = '✗ Currently Unavailable';
+        bookBtn.disabled = true;
       }
-      
-      document.getElementById('propertyInfoGrid').innerHTML = `
-        <div class="info-item">
-          <div class="info-label">Haunting Level</div>
-          <div class="info-value">${property.haunting_level || 'N/A'}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Status</div>
-          <div class="info-value">${property.available ? '✓ Available' : '✗ Unavailable'}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Location</div>
-          <div class="info-value">${property.location || 'Unknown'}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Price</div>
-          <div class="info-value">${priceFormatted}</div>
-        </div>
-      `;
-      
-      document.getElementById('hostName').textContent = property.ownerName || 'Unknown Host';
-      
-      setupBookingForm(property);
+
+      // Update host info
+      const hostName = property.ownerName || 'Unknown Host';
+      document.getElementById('hostName').textContent = hostName;
+      document.getElementById('hostAvatar').textContent = hostName.charAt(0).toUpperCase();
+
+      // Show property container
+      document.getElementById('loadingContainer').style.display = 'none';
+      document.getElementById('propertyContainer').style.display = 'block';
     }
 
-    function setupBookingForm(property) {
-      const bookBtn = document.getElementById('bookBtn');
-      const checkInInput = document.getElementById('checkIn');
-      const checkOutInput = document.getElementById('checkOut');
-      const totalPriceDiv = document.getElementById('totalPrice');
-      
-      const today = new Date().toISOString().split('T')[0];
-      checkInInput.setAttribute('min', today);
-      checkOutInput.setAttribute('min', today);
-      
-      if (!property.available) {
-        bookBtn.textContent = 'Unavailable';
-        bookBtn.disabled = true;
-        checkInInput.disabled = true;
-        checkOutInput.disabled = true;
+    // Show error
+    function showError() {
+      document.getElementById('loadingContainer').style.display = 'none';
+      document.getElementById('errorContainer').style.display = 'block';
+    }
+
+    // Proceed to booking page
+    function proceedToBooking() {
+      if (!currentProperty) {
+        alert('Property data not loaded. Please refresh the page.');
         return;
       }
-      
-      if (userRole !== 'user') {
-        bookBtn.textContent = userRole === 'lister' ? 'Hosts Cannot Book' : 'Login as User to Book';
-        bookBtn.disabled = true;
+
+      if (!currentProperty.available) {
+        alert('This property is currently unavailable for booking.');
         return;
       }
-      
-      function calculateTotal() {
-        const checkIn = new Date(checkInInput.value);
-        const checkOut = new Date(checkOutInput.value);
-        
-        if (checkIn && checkOut && checkOut > checkIn) {
-          const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-          const total = nights * property.price;
-          
-          totalPriceDiv.style.display = 'block';
-          totalPriceDiv.textContent = `Total: ${new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD'
-          }).format(total)} (${nights} nights)`;
-        } else {
-          totalPriceDiv.style.display = 'none';
-        }
-      }
-      
-      checkInInput.addEventListener('change', calculateTotal);
-      checkOutInput.addEventListener('change', calculateTotal);
-      
-      document.getElementById('bookingForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
 
-        const checkInVal = checkInInput.value;
-        const checkOutVal = checkOutInput.value;
-        if (!checkInVal || !checkOutVal) {
-          alert('⚠️ Please select check-in and check-out dates.');
-          return;
-        }
+      // Save property details to localStorage for booking page
+      localStorage.setItem('bookingProperty', JSON.stringify({
+        id: currentProperty.id,
+        title: currentProperty.title,
+        location: currentProperty.location,
+        pricePerNight: currentProperty.price,
+        image: currentProperty.image || fallbackImage,
+        haunting_level: currentProperty.haunting_level
+      }));
 
-        const checkInDate = new Date(checkInVal);
-        const checkOutDate = new Date(checkOutVal);
-
-        if (checkOutDate <= checkInDate) {
-          alert('⚠️ Check-out must be after check-in.');
-          return;
-        }
-
-        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-        const subtotal = nights * (property.price || 0);
-        const tax = Math.round(subtotal * 0.05 * 100) / 100;
-        const total = Math.round((subtotal + tax) * 100) / 100;
-
-        const bookingForPayment = {
-          propertyId: property.id,
-          propertyTitle: property.title,
-          checkin: checkInVal,
-          checkout: checkOutVal,
-          nights,
-          subtotal,
-          tax,
-          total,
-          roomType: 'Standard'
-        };
-
-        localStorage.setItem('ghostrent_booking', JSON.stringify(bookingForPayment));
-        window.location.href = 'payment.html';
-      });
+      // Redirect to booking page
+      window.location.href = `booking.html?propertyId=${currentProperty.id}`;
     }
 
-    // Close modal when clicking outside
-    document.getElementById('reviewModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeReviewModal();
-      }
-    });
-
-    async function init() {
-      await checkAuth();
-      await loadPropertyDetails();
+    // Contact host
+    function contactHost() {
+      alert('Contact feature coming soon! For now, please proceed with booking or check the contact page.');
     }
 
-    init();
+    // Logout
+    async function logout() {
+      try {
+        await fetch('/api/logout', { method: 'POST' });
+        window.location.href = 'loginpage.html';
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', loadProperty);
   </script>
 </body>
 </html>

@@ -1,656 +1,574 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Ghost Rent – Secure Payment</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ghost Rent – Booking</title>
+
+  <!-- Fonts (same family set you've used earlier) -->
   <link href="https://fonts.googleapis.com/css2?family=Griffy&family=Cinzel:wght@400;700&family=Henny+Penny&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --bg-midnight: #0a0f1a;
-      --bg-deep: #0d1b2a;
-      --bg-indigo: #102542;
-      --muted: #c3c8cc;
-      --accent: #6fb3d6;
+    :root{
+      --bg: #0E1A2F;
+      --panel: rgba(28,30,36,0.85);
+      --muted: #AEBBCC;
+      --text: #E8EBF2;
+      --accent: #9DD9FF;
       --glass: rgba(255,255,255,0.04);
+      --card-shadow: 0 10px 30px rgba(2,6,12,0.6);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      font-family: 'Cinzel', serif;
-      background: linear-gradient(150deg, var(--bg-midnight), var(--bg-deep), var(--bg-indigo));
-      color: var(--muted);
-      min-height: 100vh;
-      padding: 20px;
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: "Cinzel", serif;
+      background: url('haunted-bg.jpg') no-repeat center center/cover;
+      background-attachment: fixed;
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:36px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
+    /* subtle overlay so content pops */
     .overlay {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(90deg, rgba(3,6,12,0.35), rgba(2,4,8,0.55));
+      position: fixed; inset:0;
+      background: rgba(6,10,16,0.55);
       z-index: 0;
+      pointer-events:none;
     }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
+    .wrap {
+      width:100%;
+      max-width:1120px;
+      z-index:2;
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap:28px;
+      align-items:start;
     }
 
-    .page-header {
-      text-align: center;
-      margin-bottom: 30px;
+    /* LEFT: Order summary card */
+    .summary-card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));
+      border-radius:14px;
+      padding:18px;
+      border:1px solid var(--glass);
+      box-shadow: var(--card-shadow);
+      position:relative;
     }
 
-    .page-title {
-      font-family: 'Henny Penny', cursive;
-      font-size: 2.5rem;
-      color: #e8f6fb;
-      margin-bottom: 10px;
-      text-shadow: 0 0 15px rgba(120,190,220,0.5);
+    .summary-media{
+      width:100%;
+      height:210px;
+      border-radius:10px;
+      overflow:hidden;
+      background:#0b0d10;
+      margin-bottom:14px;
+    }
+    .summary-media img{
+      width:100%; height:100%; object-fit:cover; display:block;
+      filter: brightness(0.85) contrast(1.02);
     }
 
-    .page-subtitle {
-      color: var(--muted);
-      font-size: 1rem;
-    }
-
-    .payment-grid {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 24px;
-      margin-top: 30px;
-    }
-
-    .payment-form {
-      background: linear-gradient(180deg, rgba(12,16,20,0.7), rgba(8,10,14,0.6));
-      border-radius: 14px;
-      padding: 28px;
-      border: 1px solid var(--glass);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-    }
-
-    .form-section {
-      margin-bottom: 28px;
-    }
-
-    .section-title {
-      font-family: 'Griffy', cursive;
-      font-size: 1.4rem;
+    .property-title{
+      font-family:"Griffy", cursive;
+      font-size:1.35rem;
       color: #eef6f6;
-      margin-bottom: 16px;
+      margin-bottom:6px;
+      letter-spacing:1px;
     }
+    .property-meta{ color:var(--muted); font-size:0.92rem; margin-bottom:12px }
 
-    .form-group {
-      margin-bottom: 16px;
-    }
+    .summary-line{ height:1px; background: rgba(255,255,255,0.03); margin:12px 0; border-radius:2px;}
 
-    label {
-      display: block;
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
+    .summary-item{ display:flex; justify-content:space-between; align-items:center; margin:8px 0; color:var(--muted) }
+    .summary-item .label{ font-size:0.95rem }
+    .summary-item .value{ font-weight:700; color:var(--text) }
 
-    input, select {
-      width: 100%;
-      padding: 12px;
-      background: rgba(4,8,12,0.55);
-      border: 1px solid var(--glass);
-      border-radius: 8px;
-      color: #e7faff;
-      font-family: 'Cinzel', serif;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    input:focus, select:focus {
-      border-color: rgba(157,217,255,0.3);
-    }
-
-    .card-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 12px;
-    }
-
-    .payment-methods {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .payment-method {
-      flex: 1;
-      padding: 16px;
-      background: rgba(255,255,255,0.02);
-      border: 2px solid rgba(255,255,255,0.06);
-      border-radius: 10px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-    }
-
-    .payment-method:hover {
-      border-color: rgba(157,217,255,0.3);
-      background: rgba(255,255,255,0.04);
-    }
-
-    .payment-method.active {
-      border-color: var(--accent);
-      background: rgba(111,179,214,0.1);
-    }
-
-    .payment-method-icon {
-      font-size: 2rem;
-      margin-bottom: 8px;
-    }
-
-    .payment-method-name {
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    .order-summary {
-      background: linear-gradient(180deg, rgba(12,16,20,0.7), rgba(8,10,14,0.6));
-      border-radius: 14px;
-      padding: 24px;
-      border: 1px solid var(--glass);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-      position: sticky;
-      top: 20px;
-    }
-
-    .summary-title {
-      font-family: 'Griffy', cursive;
-      font-size: 1.3rem;
-      color: #eef6f6;
-      margin-bottom: 20px;
-    }
-
-    .summary-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      color: var(--muted);
-    }
-
-    .summary-item:last-child {
-      border-bottom: none;
-    }
-
-    .summary-item.total {
-      margin-top: 12px;
-      padding-top: 16px;
-      border-top: 2px solid rgba(255,255,255,0.1);
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    .submit-btn {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(180deg, #143b55, #0c2b40);
-      border: 1px solid rgba(120,200,240,0.06);
-      color: #e7fbff;
-      border-radius: 10px;
-      cursor: pointer;
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      font-size: 1.1rem;
-      transition: all 0.2s;
-      margin-top: 20px;
-    }
-
-    .submit-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(30,80,110,0.25);
-    }
-
-    .submit-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .security-note {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px;
-      background: rgba(81,207,102,0.1);
-      border: 1px solid rgba(81,207,102,0.2);
-      border-radius: 8px;
-      color: #51cf66;
-      font-size: 0.85rem;
-      margin-top: 16px;
-    }
-
-    .success-page {
-      display: none;
-      text-align: center;
-      max-width: 600px;
-      margin: 80px auto;
-      background: linear-gradient(180deg, rgba(12,16,20,0.7), rgba(8,10,14,0.6));
-      border-radius: 14px;
-      padding: 40px;
-      border: 1px solid var(--glass);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-    }
-
-    .success-icon {
-      font-size: 5rem;
-      margin-bottom: 20px;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-
-    .success-title {
-      font-family: 'Henny Penny', cursive;
-      font-size: 2rem;
-      color: #51cf66;
-      margin-bottom: 16px;
-    }
-
-    .confirmation-number {
-      font-size: 1.5rem;
-      font-family: 'Griffy', cursive;
-      color: var(--accent);
-      margin: 20px 0;
-    }
-
-    .success-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-top: 30px;
-    }
-
+    .summary-actions{ display:flex; gap:10px; margin-top:14px }
     .btn {
-      padding: 12px 24px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      transition: all 0.2s;
+      padding:10px 14px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.06);
+      background: rgba(10,15,20,0.6);
+      color:var(--text);
+      cursor:pointer;
+      font-family:"Cinzel", serif;
+      font-weight:700;
+      transition:all .18s ease;
+    }
+    .btn:hover{ transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,0,0,0.5) }
+
+    .cancel-link{
+      margin-left:auto;
+      text-decoration:none;
+      color: #a4c6ff;
+      font-weight:600;
     }
 
-    .btn-primary {
-      background: var(--accent);
-      color: #0b1724;
+    /* RIGHT: Form + totals */
+    .booking-card{
+      background: linear-gradient(180deg, rgba(12,16,20,0.7), rgba(8,10,14,0.6));
+      border-radius:14px;
+      padding:22px;
+      border:1px solid var(--glass);
+      box-shadow: var(--card-shadow);
     }
 
-    .btn-secondary {
-      background: rgba(255,255,255,0.1);
-      color: #e7faff;
-      border: 1px solid var(--glass);
+    .page-head{
+      text-align:center;
+      margin-bottom:18px;
+    }
+    .page-head h1{
+      font-family:"Henny Penny", cursive;
+      font-size:2.6rem;
+      color:#292a2e;
+      letter-spacing:2px;
+      margin-bottom:6px;
+      animation: ghostlyDrift 3.6s ease-in-out infinite;
+    }
+    .page-head p{ color:var(--muted); font-size:0.95rem }
+
+    .grid-form{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    label{ display:block; color:var(--muted); font-size:0.86rem; margin-bottom:6px }
+    input[type="date"], input[type="number"], select, textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      background: #0f1419;
+      border:1px solid rgba(255,255,255,0.04);
+      color:var(--text);
+      font-size:0.95rem;
+    }
+    textarea{ min-height:92px; resize:vertical; padding-top:10px }
+
+    .addon{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px;
+      border-radius:10px;
+      background: rgba(255,255,255,0.015);
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    .addon input{ width:auto; accent-color: var(--accent) }
+
+    .totals {
+      margin-top:18px;
+      padding:14px;
+      border-radius:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.12));
+      border:1px solid rgba(255,255,255,0.02);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
     }
 
-    @media (max-width: 900px) {
-      .payment-grid {
-        grid-template-columns: 1fr;
+    .tot-row{ display:flex; justify-content:space-between; color:var(--muted); font-size:0.95rem }
+    .tot-row strong{ color:var(--text) }
+    .tot-row .total { color: var(--accent); font-weight:800 }
+
+    .proceed-wrap{ display:flex; gap:12px; margin-top:18px; align-items:center; justify-content:flex-end }
+    .proceed{
+      padding:12px 18px;
+      border-radius:12px;
+      border:none;
+      background:var(--accent);
+      color:#0b1724;
+      font-weight:800;
+      cursor:pointer;
+      font-family:"Cinzel", serif;
+      box-shadow: 0 10px 30px rgba(15,30,50,0.25);
+      transition:all .18s ease;
+    }
+    .proceed:disabled{ opacity:0.6; cursor:not-allowed; transform:none }
+
+    /* responsive */
+    @media (max-width: 920px){
+      .wrap{ grid-template-columns: 1fr; max-width:900px }
+      .grid-form{ grid-template-columns: 1fr }
+      .summary-media{ height:180px }
+      .page-head h1{ font-size:2rem }
+    }
+
+    /* small ghostly animation */
+    @keyframes ghostlyDrift {
+      0%,100%{
+        text-shadow:
+          0 0 8px rgba(30,30,35,0.35),
+          0 0 18px rgba(40,45,55,0.25);
+        transform: translateY(0);
       }
-      .order-summary {
-        position: static;
+      50%{
+        text-shadow:
+          0 0 12px rgba(40,45,60,0.45),
+          0 0 28px rgba(30,35,50,0.35);
+        transform: translateY(-6px);
       }
+    }
+
+    /* small helper text style */
+    .hint{ font-size:0.86rem; color:var(--muted) }
+
+    /* subtle input focus */
+    input:focus, textarea:focus, select:focus{
+      outline:none;
+      border-color: rgba(157,217,255,0.22);
+      box-shadow: 0 0 8px rgba(157,217,255,0.06);
     }
   </style>
 </head>
 <body>
-  <div class="overlay"></div>
+  <div class="overlay" aria-hidden="true"></div>
 
-  <div id="paymentPage" class="container">
-    <div class="page-header">
-      <h1 class="page-title">👻 Secure Payment</h1>
-      <p class="page-subtitle">Complete your haunted reservation</p>
-    </div>
-
-    <div class="payment-grid">
-      <div class="payment-form">
-        <div class="form-section">
-          <h2 class="section-title">Payment Method</h2>
-          <div class="payment-methods">
-            <div class="payment-method active" onclick="selectPaymentMethod('card')">
-              <div class="payment-method-icon">💳</div>
-              <div class="payment-method-name">Credit Card</div>
-            </div>
-            <div class="payment-method" onclick="selectPaymentMethod('paypal')">
-              <div class="payment-method-icon">🅿️</div>
-              <div class="payment-method-name">PayPal</div>
-            </div>
-            <div class="payment-method" onclick="selectPaymentMethod('crypto')">
-              <div class="payment-method-icon">₿</div>
-              <div class="payment-method-name">Crypto</div>
-            </div>
-          </div>
-        </div>
-
-        <form id="paymentForm" onsubmit="return false;">
-          <div id="cardFields">
-            <div class="form-section">
-              <h2 class="section-title">Card Information</h2>
-              
-              <div class="form-group">
-                <label for="cardNumber">Card Number</label>
-                <input 
-                  type="text" 
-                  id="cardNumber" 
-                  placeholder="1234 5678 9012 3456"
-                  maxlength="19"
-                  required
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="cardholderName">Cardholder Name</label>
-                <input 
-                  type="text" 
-                  id="cardholderName" 
-                  placeholder="John Doe"
-                  required
-                >
-              </div>
-
-              <div class="card-grid">
-                <div class="form-group">
-                  <label for="cardExpiry">Expiry Date</label>
-                  <input 
-                    type="text" 
-                    id="cardExpiry" 
-                    placeholder="MM/YY"
-                    maxlength="5"
-                    required
-                  >
-                </div>
-
-                <div class="form-group">
-                  <label for="cardCVV">CVV</label>
-                  <input 
-                    type="text" 
-                    id="cardCVV" 
-                    placeholder="123"
-                    maxlength="4"
-                    required
-                  >
-                </div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <h2 class="section-title">Billing Address</h2>
-              
-              <div class="form-group">
-                <label for="billingAddress">Street Address</label>
-                <input 
-                  type="text" 
-                  id="billingAddress" 
-                  placeholder="123 Haunted Lane"
-                  required
-                >
-              </div>
-
-              <div class="card-grid">
-                <div class="form-group">
-                  <label for="billingCity">City</label>
-                  <input 
-                    type="text" 
-                    id="billingCity" 
-                    placeholder="Salem"
-                    required
-                  >
-                </div>
-
-                <div class="form-group">
-                  <label for="billingZip">ZIP Code</label>
-                  <input 
-                    type="text" 
-                    id="billingZip" 
-                    placeholder="12345"
-                    required
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="security-note">
-            <span>🔒</span>
-            <span>Your payment information is secure and encrypted</span>
-          </div>
-
-          <button type="submit" class="submit-btn" onclick="processPayment()">
-            Complete Payment
-          </button>
-        </form>
+  <div class="wrap" role="main">
+    <!-- LEFT: order summary -->
+    <aside class="summary-card" aria-labelledby="summary-title">
+      <div class="summary-media" id="prop-image">
+        <img src="property-placeholder.jpg" alt="Property image" id="summary-img">
       </div>
 
-      <div class="order-summary">
-        <h3 class="summary-title">Order Summary</h3>
-        
-        <div class="summary-item">
-          <span>Property:</span>
-          <span id="summaryProperty">-</span>
-        </div>
-        
-        <div class="summary-item">
-          <span>Check-in:</span>
-          <span id="summaryCheckin">-</span>
-        </div>
-        
-        <div class="summary-item">
-          <span>Check-out:</span>
-          <span id="summaryCheckout">-</span>
-        </div>
-        
-        <div class="summary-item">
-          <span>Nights:</span>
-          <span id="summaryNights">-</span>
-        </div>
-        
-        <div class="summary-item">
-          <span>Room Type:</span>
-          <span id="summaryRoom">-</span>
-        </div>
-        
-        <div class="summary-item">
-          <span>Subtotal:</span>
-          <span id="summarySubtotal">$0</span>
-        </div>
-        
-        <div class="summary-item">
-          <span>Tax (5%):</span>
-          <span id="summaryTax">$0</span>
-        </div>
-        
-        <div class="summary-item total">
-          <span>Total:</span>
-          <span id="summaryTotal">$0</span>
-        </div>
-      </div>
-    </div>
-  </div>
+      <div>
+        <div class="property-title" id="summary-title">Loading...</div>
+        <div class="property-meta" id="summary-location">Loading location...</div>
 
-  <div id="successPage" class="success-page">
-    <div class="success-icon">🎃</div>
-    <h2 class="success-title">Payment Successful!</h2>
-    <p style="color: var(--muted); margin: 16px 0;">
-      Your haunted reservation has been confirmed. We've sent a confirmation email with all the details.
-    </p>
-    
-    <div class="confirmation-number">
-      Confirmation: <span id="confirmationNumber">-</span>
-    </div>
-    
-    <div class="success-actions">
-      <button class="btn btn-primary" onclick="window.location.href='dashboard-user.html'">
-        View My Bookings
-      </button>
-      <button class="btn btn-secondary" onclick="window.location.href='property-list.html'">
-        Browse More Properties
-      </button>
-    </div>
+        <div class="summary-line"></div>
+
+        <div class="summary-item"><div class="label">Rent / night</div><div class="value" id="summary-price">$0</div></div>
+        <div class="summary-item"><div class="label">Nights</div><div class="value" id="summary-nights">—</div></div>
+        <div class="summary-item"><div class="label">Add-ons</div><div class="value" id="summary-addons">—</div></div>
+        <div class="summary-item"><div class="label">Tax (5%)</div><div class="value" id="summary-tax">$0.00</div></div>
+
+        <div class="summary-line"></div>
+
+        <div class="summary-item"><div class="label">Total</div><div class="value" id="summary-total">$0.00</div></div>
+
+        <div class="summary-actions">
+          <a class="cancel-link" href="dashboard.html" id="cancelBooking">Cancel</a>
+          <button class="btn" id="editListing">View Listing</button>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- RIGHT: booking form -->
+    <section class="booking-card" aria-labelledby="booking-heading">
+      <div class="page-head">
+        <h1 id="booking-heading">Payment & Booking</h1>
+        <p class="hint">Fill the dates and options. Total updates automatically. Proceed to payment when ready.</p>
+      </div>
+
+      <form id="bookingForm" class="booking-form" onsubmit="return false;">
+        <div class="grid-form">
+          <div>
+            <label for="checkin">Check-in</label>
+            <input id="checkin" type="date" required>
+          </div>
+
+          <div>
+            <label for="checkout">Check-out</label>
+            <input id="checkout" type="date" required>
+          </div>
+
+          <div>
+            <label for="guests">Guests</label>
+            <input id="guests" type="number" min="1" value="1" required>
+          </div>
+
+          <div>
+            <label for="room-type">Room type</label>
+            <select id="room-type">
+              <option value="standard" selected>Standard – main hall</option>
+              <option value="attic">Attic suite (+$25/night)</option>
+              <option value="crypt">Crypt chamber (+$45/night)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <label>Add-ons</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+            <label class="addon"><input type="checkbox" class="addon-checkbox" data-price="20" id="addon-clean"> Cleaning Service ($20)</label>
+            <label class="addon"><input type="checkbox" class="addon-checkbox" data-price="35" id="addon-ritual"> Ghost Cleanse Ritual ($35)</label>
+            <label class="addon"><input type="checkbox" class="addon-checkbox" data-price="50" id="addon-seance"> Séance Room ($50)</label>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <label for="requests">Special requests</label>
+          <textarea id="requests" placeholder="e.g. Arrange candles, avoid the west wing..."></textarea>
+        </div>
+
+        <div class="totals" aria-live="polite" style="margin-top:18px;">
+          <div class="tot-row"><span>Base (night × price)</span><strong id="cal-base">$0.00</strong></div>
+          <div class="tot-row"><span>Add-ons</span><strong id="cal-addons">$0.00</strong></div>
+          <div class="tot-row"><span>Subtotal</span><strong id="cal-sub">$0.00</strong></div>
+          <div class="tot-row"><span>Tax (5%)</span><strong id="cal-tax">$0.00</strong></div>
+          <div class="tot-row" style="font-size:1.05rem; border-top:1px dashed rgba(255,255,255,0.03); padding-top:8px;"><span>Total</span><span class="total" id="cal-total">$0.00</span></div>
+        </div>
+
+        <div class="proceed-wrap">
+          <button id="saveLocal" class="btn" type="button">Save Draft</button>
+          <button id="proceedBtn" class="proceed" type="button">Proceed to Payment</button>
+        </div>
+      </form>
+    </section>
   </div>
 
   <script>
-    let currentPaymentMethod = 'card';
-    let bookingData = null;
+    /***********************
+     * Booking page JS
+     * - Tax fixed at 5% per your request
+     * - Saves booking to localStorage under 'ghostrent_booking'
+     * - Redirects to 'payment.html' after proceed
+     * - Loads property data from localStorage (passed from property-detail.html)
+     ***********************/
+    (function(){
+      const TAX_RATE = 0.05;
 
-    function formatMoney(amount) {
-      return '$' + Number(amount).toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
+      // ---------- Load property data from localStorage ----------
+      // This is set by property-detail.html when user clicks "Book This Haunt"
+      let PROPERTY = {
+        id: 101,
+        title: "The Withering Manor",
+        location: "Black Hollow, Near Crescent Lake",
+        pricePerNight: 120,
+        image: "property-placeholder.jpg",
+        url: "property-detail.html?id=101"
+      };
 
-    function selectPaymentMethod(method) {
-      currentPaymentMethod = method;
-      
-      document.querySelectorAll('.payment-method').forEach(el => {
-        el.classList.remove('active');
-      });
-      
-      event.target.closest('.payment-method').classList.add('active');
-      
-      // Show/hide card fields based on method
-      const cardFields = document.getElementById('cardFields');
-      if (method === 'card') {
-        cardFields.style.display = 'block';
-      } else {
-        cardFields.style.display = 'none';
-      }
-    }
-
-    function loadBookingData() {
+      // Try to load property from localStorage
       try {
-        const stored = localStorage.getItem('ghostrent_booking');
-        if (!stored) {
-          alert('⚠️ No booking data found. Redirecting to property listings...');
-          window.location.href = 'property-list.html';
+        const savedProperty = localStorage.getItem('bookingProperty');
+        if (savedProperty) {
+          const parsed = JSON.parse(savedProperty);
+          PROPERTY = {
+            id: parsed.id,
+            title: parsed.title,
+            location: parsed.location,
+            pricePerNight: parsed.pricePerNight,
+            image: parsed.image,
+            url: `property-detail.html?id=${parsed.id}`
+          };
+        }
+      } catch (e) {
+        console.error('Error loading property data:', e);
+      }
+
+      // ---------- DOM refs ----------
+      const summaryImg = document.getElementById('summary-img');
+      const summaryTitle = document.getElementById('summary-title');
+      const summaryLocation = document.getElementById('summary-location');
+      const summaryPrice = document.getElementById('summary-price');
+
+      const checkinInput = document.getElementById('checkin');
+      const checkoutInput = document.getElementById('checkout');
+      const guestsInput = document.getElementById('guests');
+      const roomTypeSelect = document.getElementById('room-type');
+      const addonCheckboxes = Array.from(document.querySelectorAll('.addon-checkbox'));
+      const requestsInput = document.getElementById('requests');
+
+      const calBase = document.getElementById('cal-base');
+      const calAddons = document.getElementById('cal-addons');
+      const calSub = document.getElementById('cal-sub');
+      const calTax = document.getElementById('cal-tax');
+      const calTotal = document.getElementById('cal-total');
+
+      const summaryNights = document.getElementById('summary-nights');
+      const summaryAddons = document.getElementById('summary-addons');
+      const summaryTax = document.getElementById('summary-tax');
+      const summaryTotal = document.getElementById('summary-total');
+
+      const proceedBtn = document.getElementById('proceedBtn');
+      const saveLocalBtn = document.getElementById('saveLocal');
+      const editListingBtn = document.getElementById('editListing');
+      const cancelBooking = document.getElementById('cancelBooking');
+
+      // Initialize UI with property values
+      function populateProperty(){
+        summaryImg.src = PROPERTY.image;
+        summaryTitle.textContent = PROPERTY.title;
+        summaryLocation.textContent = PROPERTY.location;
+        summaryPrice.textContent = `$${formatNumber(PROPERTY.pricePerNight)}`;
+      }
+
+      // Helper: format
+      function formatNumber(n){ return Number(n).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}); }
+      function formatMoney(n){ return '$' + Number(n).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+
+      // Calculate nights: returns integer >= 0
+      function calcNights(checkin, checkout){
+        if(!checkin || !checkout) return 0;
+        const a = new Date(checkin);
+        const b = new Date(checkout);
+        const diff = Math.ceil((b - a) / (1000 * 60 * 60 * 24));
+        return diff > 0 ? diff : 0;
+      }
+
+      // Add-on sum:
+      function calcAddons(){
+        return addonCheckboxes.reduce((sum, cb) => {
+          if(cb.checked) return sum + Number(cb.dataset.price || 0);
+          return sum;
+        }, 0);
+      }
+
+      // Room type extra per night
+      function roomTypeExtra(type){
+        if(type === 'attic') return 25;
+        if(type === 'crypt') return 45;
+        return 0;
+      }
+
+      // Main calc
+      function recalcAndRender(){
+        const checkin = checkinInput.value;
+        const checkout = checkoutInput.value;
+        const nights = calcNights(checkin, checkout);
+        const guests = Math.max(1, Number(guestsInput.value || 1));
+        const roomExtra = roomTypeExtra(roomTypeSelect.value);
+        const basePerNight = PROPERTY.pricePerNight + roomExtra;
+
+        const base = nights * basePerNight;
+        const addonsFlat = calcAddons();
+        const subtotal = base + addonsFlat;
+        const tax = subtotal * TAX_RATE;
+        const total = subtotal + tax;
+
+        // render
+        summaryNights.textContent = nights ? nights + ' night' + (nights>1 ? 's' : '') : '—';
+        summaryAddons.textContent = addonsFlat > 0 ? formatMoney(addonsFlat) : '—';
+        summaryTax.textContent = tax > 0 ? formatMoney(tax) : '$0.00';
+        summaryTotal.textContent = formatMoney(total);
+
+        calBase.textContent = formatMoney(base);
+        calAddons.textContent = formatMoney(addonsFlat);
+        calSub.textContent = formatMoney(subtotal);
+        calTax.textContent = formatMoney(tax);
+        calTotal.textContent = formatMoney(total);
+
+        // enable proceed only if nights >=1
+        proceedBtn.disabled = nights < 1;
+      }
+
+      // Save booking to localStorage (so payment.html can read it)
+      function saveBookingDraft(){
+        const booking = makeBookingObject();
+        localStorage.setItem('ghostrent_booking', JSON.stringify(booking));
+        alert('Draft saved locally. Backend dev can replace this with API call.');
+      }
+
+      // Create booking object
+      function makeBookingObject(){
+        const nights = calcNights(checkinInput.value, checkoutInput.value);
+        const roomExtra = roomTypeExtra(roomTypeSelect.value);
+        const addons = addonCheckboxes.filter(cb => cb.checked).map(cb => ({
+          id: cb.id,
+          label: cb.parentElement.textContent.trim(),
+          price: Number(cb.dataset.price || 0)
+        }));
+
+        const basePerNight = PROPERTY.pricePerNight + roomExtra;
+        const base = nights * basePerNight;
+        const addonsFlat = calcAddons();
+        const subtotal = base + addonsFlat;
+        const tax = subtotal * TAX_RATE;
+        const total = subtotal + tax;
+
+        return {
+          propertyId: PROPERTY.id,
+          propertyTitle: PROPERTY.title,
+          propertyLocation: PROPERTY.location,
+          pricePerNight: PROPERTY.pricePerNight,
+          roomType: roomTypeSelect.value,
+          roomExtraPerNight: roomExtra,
+          checkin: checkinInput.value,
+          checkout: checkoutInput.value,
+          nights,
+          guests: Number(guestsInput.value || 1),
+          addons,
+          specialRequests: requestsInput.value,
+          subtotal,
+          tax,
+          total,
+          createdAt: new Date().toISOString()
+        };
+      }
+
+      // Proceed to payment: save to localStorage then redirect
+      function proceedToPayment(){
+        const booking = makeBookingObject();
+
+        // Basic validation
+        if(!booking.checkin || !booking.checkout){
+          alert('Please pick both check-in and check-out dates.');
           return;
         }
-        
-        bookingData = JSON.parse(stored);
-        
-        // Populate summary
-        document.getElementById('summaryProperty').textContent = bookingData.propertyTitle || '-';
-        document.getElementById('summaryCheckin').textContent = new Date(bookingData.checkin).toLocaleDateString();
-        document.getElementById('summaryCheckout').textContent = new Date(bookingData.checkout).toLocaleDateString();
-        document.getElementById('summaryNights').textContent = bookingData.nights + ' night' + (bookingData.nights > 1 ? 's' : '');
-        document.getElementById('summaryRoom').textContent = bookingData.roomType || 'Standard';
-        document.getElementById('summarySubtotal').textContent = formatMoney(bookingData.subtotal);
-        document.getElementById('summaryTax').textContent = formatMoney(bookingData.tax);
-        document.getElementById('summaryTotal').textContent = formatMoney(bookingData.total);
-        
-      } catch (error) {
-        console.error('Error loading booking:', error);
-        alert('⚠️ Failed to load booking data');
-        window.location.href = 'property-list.html';
-      }
-    }
-
-    // Format card number as user types
-    document.getElementById('cardNumber').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\s/g, '');
-      let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-      e.target.value = formattedValue;
-    });
-
-    // Format expiry date
-    document.getElementById('cardExpiry').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length >= 2) {
-        value = value.slice(0, 2) + '/' + value.slice(2, 4);
-      }
-      e.target.value = value;
-    });
-
-    // Only allow numbers in CVV
-    document.getElementById('cardCVV').addEventListener('input', function(e) {
-      e.target.value = e.target.value.replace(/\D/g, '');
-    });
-
-    async function processPayment() {
-      if (!bookingData) {
-        alert('⚠️ Booking data is missing');
-        return;
-      }
-
-      // Validate form
-      if (currentPaymentMethod === 'card') {
-        const cardNumber = document.getElementById('cardNumber').value;
-        const cardExpiry = document.getElementById('cardExpiry').value;
-        const cardCVV = document.getElementById('cardCVV').value;
-        const cardholderName = document.getElementById('cardholderName').value;
-
-        if (!cardNumber || !cardExpiry || !cardCVV || !cardholderName) {
-          alert('⚠️ Please fill in all card details');
+        if(booking.nights < 1){
+          alert('Check-out must be after check-in.');
           return;
         }
+
+        localStorage.setItem('ghostrent_booking', JSON.stringify(booking));
+        // Redirect - payment.html should read the localStorage key and populate payment UI
+        window.location.href = 'payment.html';
       }
 
-      // Show loading state
-      const submitBtn = document.querySelector('.submit-btn');
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Processing Payment...';
+      // Init: wire listeners
+      function init(){
+        populateProperty();
+        recalcAndRender();
 
-      try {
-        const response = await fetch('/api/payments/process', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'same-origin',
-          body: JSON.stringify({
-            bookingData: bookingData,
-            paymentMethod: currentPaymentMethod,
-            cardNumber: document.getElementById('cardNumber').value,
-            cardExpiry: document.getElementById('cardExpiry').value,
-            cardCVV: document.getElementById('cardCVV').value,
-            cardholderName: document.getElementById('cardholderName').value
-          })
+        // listeners for inputs
+        [checkinInput, checkoutInput, guestsInput, roomTypeSelect, ...addonCheckboxes].forEach(el => {
+          el.addEventListener('change', recalcAndRender);
         });
 
-        const data = await response.json();
+        // save & proceed
+        saveLocalBtn.addEventListener('click', saveBookingDraft);
+        proceedBtn.addEventListener('click', proceedToPayment);
 
-        if (data.success) {
-          // Clear booking data
-          localStorage.removeItem('ghostrent_booking');
-          
-          // Show success page
-          document.getElementById('paymentPage').style.display = 'none';
-          document.getElementById('successPage').style.display = 'block';
-          document.getElementById('confirmationNumber').textContent = data.payment.confirmationNumber;
-          
-          // Scroll to top
-          window.scrollTo(0, 0);
-        } else {
-          alert('❌ ' + data.message);
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Complete Payment';
-        }
+        // edit listing (opens property detail)
+        editListingBtn.addEventListener('click', () => {
+          window.location.href = PROPERTY.url;
+        });
 
-      } catch (error) {
-        console.error('Payment error:', error);
-        alert('⚰️ Payment processing failed. Please try again.');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Complete Payment';
+        cancelBooking.addEventListener('click', (e) => {
+          // default goes to dashboard.html; no special action needed
+        });
+
+        // Try to prefill dates from URL params if backend wants to deep-link
+        try {
+          const params = new URLSearchParams(window.location.search);
+          if(params.has('checkin')) checkinInput.value = params.get('checkin');
+          if(params.has('checkout')) checkoutInput.value = params.get('checkout');
+          if(params.has('guests')) guestsInput.value = params.get('guests');
+          if(params.has('room')) roomTypeSelect.value = params.get('room');
+        } catch(e){}
+        recalcAndRender();
       }
-    }
 
-    // Initialize
-    window.addEventListener('DOMContentLoaded', () => {
-      loadBookingData();
-    });
+      // run
+      init();
+
+      // expose for debugging
+      window._ghostrent = {
+        makeBookingObject,
+        saveBookingDraft,
+        recalcAndRender
+      };
+    })();
   </script>
 </body>
 </html>
