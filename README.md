@@ -33,7 +33,7 @@ GhostRent is a full-stack web application that lets users browse, list, and book
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -100,9 +100,9 @@ npm start
 
 | Name | Role |
 |---|---|
-| [@hermit-hani] | [e.g. Frontend / Auth] |
-| [@lmaomaidah] | [e.g. Backend / API] |
-| [Alisha Javed] | [e.g. Admin Panel / Analytics] |
+| [Alisha Javed] | [Group Leader / Scrum Master] |
+| [@hermit-hani] | [Frontend] |
+| [@lmaomaidah] | [Backend] |
 
 ---
 
