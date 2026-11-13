@@ -96,16 +96,6 @@ npm start
 
 ---
 
-## Team
-
-| Name | Role |
-|---|---|
-| [Alisha Javed] | [Group Leader / Scrum Master] |
-| [@hermit-hani] | [Frontend] |
-| [@lmaomaidah] | [Backend] |
-
----
-
 ## License
 
 This project was developed for educational purposes as part of a Software Engineering course. All rights reserved by the team.
